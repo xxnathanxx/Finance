@@ -131,6 +131,27 @@
   padding: 10px 12px;
 }
 
+.alternar-modo-login {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+}
+
+.link-botao {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.link-botao:hover {
+  color: var(--color-primary-hover);
+  border-color: transparent;
+}
+
 .botao {
   border-radius: var(--radius-sm);
   padding: 10px 16px;

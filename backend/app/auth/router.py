@@ -81,7 +81,7 @@ def register(payload: RegisterIn, db: Session = Depends(get_db)) -> User:
 
     exists = db.query(User).filter(User.email == email).first()
     if exists:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Email já cadastrado")
 
     user = User(
         email=email,
@@ -114,10 +114,10 @@ def login(
 
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
 
     if not verify_password(password, user.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
 
     access_jti = str(uuid.uuid4())
     refresh_jti = str(uuid.uuid4())
@@ -150,14 +150,14 @@ def refresh(payload: RefreshIn, db: Session = Depends(get_db)) -> TokenPairOut:
     try:
         data = decode_token(payload.refresh_token)
     except Exception:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
     if data.get("type") != "refresh":
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token type")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Tipo de token inválido")
 
     subject = data.get("sub")
     if not subject:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token inválido")
 
     old_jti = data.get("jti")
     if old_jti and is_jti_revoked(db, str(old_jti)):
