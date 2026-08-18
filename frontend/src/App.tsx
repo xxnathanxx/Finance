@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import Categories from "./pages/Categories";
 import Relatorio from "./pages/Relatorio";
+import Transacoes from "./pages/Transacoes";
 import { isLoggedIn, logout, me } from "./lib/auth";
 import type { UserOut } from "./lib/auth";
 import "./App.css";
@@ -12,11 +13,11 @@ type AppState =
   | { status: "loggedIn"; user: UserOut }
   | { status: "error"; message: string };
 
-type Aba = "categorias" | "relatorio";
+type Aba = "transacoes" | "categorias" | "relatorio";
 
 export default function App() {
   const [state, setState] = useState<AppState>({ status: "loading" });
-  const [abaAtiva, setAbaAtiva] = useState<Aba>("categorias");
+  const [abaAtiva, setAbaAtiva] = useState<Aba>("transacoes");
 
   async function loadSession() {
     if (!isLoggedIn()) {
@@ -90,10 +91,10 @@ export default function App() {
 
       <nav className="navegacao-abas">
         <button
-          className={`aba-botao${abaAtiva === "categorias" ? " aba-ativa" : ""}`}
-          onClick={() => setAbaAtiva("categorias")}
+          className={`aba-botao${abaAtiva === "transacoes" ? " aba-ativa" : ""}`}
+          onClick={() => setAbaAtiva("transacoes")}
         >
-          Categorias
+          Transações
         </button>
         <button
           className={`aba-botao${abaAtiva === "relatorio" ? " aba-ativa" : ""}`}
@@ -101,10 +102,18 @@ export default function App() {
         >
           Relatório
         </button>
+        <button
+          className={`aba-botao${abaAtiva === "categorias" ? " aba-ativa" : ""}`}
+          onClick={() => setAbaAtiva("categorias")}
+        >
+          Categorias
+        </button>
       </nav>
 
       <main className="conteudo-app">
-        {abaAtiva === "categorias" ? <Categories /> : <Relatorio />}
+        {abaAtiva === "transacoes" && <Transacoes />}
+        {abaAtiva === "relatorio" && <Relatorio />}
+        {abaAtiva === "categorias" && <Categories />}
       </main>
     </div>
   );

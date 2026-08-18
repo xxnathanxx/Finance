@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
+import { formatarMoeda, mesAtualComoValorDeInput } from "../lib/formatacao";
 
 type ResumoCategoria = {
   category_id: number | null;
@@ -26,16 +27,6 @@ const CORES_CATEGORIA = [
 ];
 const COR_OUTRAS = "#898781";
 const MAX_CATEGORIAS_EXIBIDAS = 7;
-
-function formatarMoeda(valor: number): string {
-  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function mesAtualComoValorDeInput(): string {
-  const agora = new Date();
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  return `${agora.getFullYear()}-${mes}`;
-}
 
 export default function Relatorio() {
   const [mesSelecionado, setMesSelecionado] = useState(mesAtualComoValorDeInput());
