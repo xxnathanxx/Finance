@@ -19,7 +19,13 @@ def _base_dir() -> Path:
 BASE_DIR = _base_dir()
 FRONTEND_DIST = BASE_DIR / "frontend_dist"
 
-DATA_DIR = Path(os.getenv("LOCALAPPDATA", str(Path.home()))) / "FinancePro"
+DATA_DIR = Path(os.getenv("LOCALAPPDATA", str(Path.home()))) / "Orbita"
+
+# Migração de instalações antigas (quando o app se chamava Finance Pro)
+_DATA_DIR_ANTIGA = Path(os.getenv("LOCALAPPDATA", str(Path.home()))) / "FinancePro"
+if _DATA_DIR_ANTIGA.exists() and not DATA_DIR.exists():
+    _DATA_DIR_ANTIGA.rename(DATA_DIR)
+
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = DATA_DIR / "finance.db"
 LOG_PATH = DATA_DIR / "desktop_app.log"
@@ -92,7 +98,7 @@ def main() -> None:
 
     if servidor_pronto:
         webview.create_window(
-            "Finance Pro",
+            "Órbita",
             "http://127.0.0.1:8000",
             width=1100,
             height=800,
@@ -112,7 +118,7 @@ def main() -> None:
           {detalhe}
         </body></html>
         """
-        webview.create_window("Finance Pro", html=html_erro, width=900, height=600)
+        webview.create_window("Órbita", html=html_erro, width=900, height=600)
 
     webview.start()
 

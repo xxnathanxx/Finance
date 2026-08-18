@@ -76,8 +76,8 @@ export default function App() {
     <div className="estrutura-app">
       <header className="cabecalho-app">
         <div className="marca">
-          <span className="selo-marca">F</span>
-          <span className="nome-marca">Finance Pro</span>
+          <span className="selo-marca">Ó</span>
+          <span className="nome-marca">Órbita</span>
         </div>
 
         <div className="info-sessao">

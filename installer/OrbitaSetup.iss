@@ -1,21 +1,21 @@
-#define MyAppName "Finance Pro"
+#define MyAppName "Órbita"
 #define MyAppVersion "1.0.0"
-#define MyAppPublisher "Finance Pro"
-#define MyAppExeName "FinanceProDesktop.exe"
+#define MyAppPublisher "Órbita"
+#define MyAppExeName "OrbitaDesktop.exe"
 
 [Setup]
 AppId={{B41C0454-BA76-4C10-878A-516F9DB2633A}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\FinancePro
+DefaultDirName={autopf}\Orbita
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
 DisableDirPage=no
 PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=output
-OutputBaseFilename=FinanceProSetup
+OutputBaseFilename=OrbitaSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -28,7 +28,7 @@ Name: "brazilianportuguese"; MessagesFile: "compiler:Languages\BrazilianPortugue
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\backend\dist\FinanceProDesktop.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\backend\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

@@ -1,4 +1,4 @@
-# Finance
+# Órbita
 
 Aplicação de controle financeiro com backend em FastAPI e frontend em React + TypeScript (Vite).
 
@@ -73,22 +73,22 @@ cd ../backend
 xcopy /E /I ..\frontend\dist frontend_dist   # no Windows; use `cp -r ../frontend/dist frontend_dist` no Linux/macOS
 pip install -r requirements-desktop.txt
 
-pyinstaller --name FinanceProDesktop --onefile --windowed ^
+pyinstaller --name OrbitaDesktop --onefile --windowed ^
   --add-data "frontend_dist;frontend_dist" ^
   --hidden-import passlib.handlers.bcrypt ^
   --hidden-import passlib.handlers.pbkdf2 ^
   desktop_app.py
 ```
 
-O executável fica em `backend/dist/FinanceProDesktop.exe`. Na primeira vez que roda, ele cria sozinho o banco em `%LOCALAPPDATA%\FinancePro\finance.db`, as tabelas, as categorias padrão, e um usuário admin (`admin@local.app` / `admin123456`, configurável nas variáveis de ambiente `ADMIN_EMAIL`/`ADMIN_PASSWORD` dentro de `desktop_app.py`).
+O executável fica em `backend/dist/OrbitaDesktop.exe`. Na primeira vez que roda, ele cria sozinho o banco em `%LOCALAPPDATA%\Orbita\finance.db`, as tabelas, as categorias padrão, e um usuário admin (`admin@local.app` / `admin123456`, configurável nas variáveis de ambiente `ADMIN_EMAIL`/`ADMIN_PASSWORD` dentro de `desktop_app.py`).
 
 ### Gerando o instalador (Inno Setup)
 
-O `.exe` acima é portátil (roda de onde estiver). Pra ter um instalador de verdade - com tela de escolha de pasta, atalho no menu iniciar, ícone opcional na área de trabalho e desinstalador registrado no Windows - use o script em `installer/FinanceProSetup.iss` com o [Inno Setup](https://jrsoftware.org/isinfo.php) (grátis):
+O `.exe` acima é portátil (roda de onde estiver). Pra ter um instalador de verdade - com tela de escolha de pasta, atalho no menu iniciar, ícone opcional na área de trabalho e desinstalador registrado no Windows - use o script em `installer/OrbitaSetup.iss` com o [Inno Setup](https://jrsoftware.org/isinfo.php) (grátis):
 
 ```bash
-# depois de gerar backend/dist/FinanceProDesktop.exe (passo acima)
-"C:\Program Files\Inno Setup 7\ISCC.exe" installer\FinanceProSetup.iss
+# depois de gerar backend/dist/OrbitaDesktop.exe (passo acima)
+"C:\Program Files\Inno Setup 7\ISCC.exe" installer\OrbitaSetup.iss
 ```
 
-O instalador final fica em `installer/output/FinanceProSetup.exe`. Ele não pede permissão de administrador (instala em `%LOCALAPPDATA%\Programs\FinancePro` por padrão, mas deixa escolher outra pasta).
+O instalador final fica em `installer/output/OrbitaSetup.exe`. Ele não pede permissão de administrador (instala em `%LOCALAPPDATA%\Programs\Orbita` por padrão, mas deixa escolher outra pasta).
