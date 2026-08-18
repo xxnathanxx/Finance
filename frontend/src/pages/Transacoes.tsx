@@ -27,7 +27,7 @@ type FormularioEdicao = {
   data: string;
 };
 
-type ModoFiltro = "mes" | "personalizado";
+type ModoFiltro = "mes" | "personalizado" | "tudo";
 
 function hojeComoValorDeInput(): string {
   return new Date().toISOString().slice(0, 10);
@@ -87,7 +87,9 @@ export default function Transacoes() {
 
   const transacoesFiltradas = useMemo(() => {
     const filtradas =
-      modoFiltro === "mes"
+      modoFiltro === "tudo"
+        ? transacoes
+        : modoFiltro === "mes"
         ? transacoes.filter((t) => t.date.startsWith(mesSelecionado))
         : transacoes.filter((t) => t.date >= dataInicio && t.date <= dataFim);
 
@@ -107,7 +109,11 @@ export default function Transacoes() {
   const saldoFiltrado = receitaFiltrada - despesaFiltrada;
 
   const rotuloPeriodo =
-    modoFiltro === "mes" ? mesSelecionado : `${formatarData(dataInicio)} a ${formatarData(dataFim)}`;
+    modoFiltro === "tudo"
+      ? "todo o período"
+      : modoFiltro === "mes"
+      ? mesSelecionado
+      : `${formatarData(dataInicio)} a ${formatarData(dataFim)}`;
 
   async function criarTransacao(e: React.FormEvent) {
     e.preventDefault();
@@ -219,7 +225,11 @@ export default function Transacoes() {
     const url = URL.createObjectURL(blob);
 
     const nomeArquivo =
-      modoFiltro === "mes" ? `transacoes-${mesSelecionado}.csv` : `transacoes-${dataInicio}_a_${dataFim}.csv`;
+      modoFiltro === "tudo"
+        ? "transacoes-todas.csv"
+        : modoFiltro === "mes"
+        ? `transacoes-${mesSelecionado}.csv`
+        : `transacoes-${dataInicio}_a_${dataFim}.csv`;
 
     const link = document.createElement("a");
     link.href = url;
@@ -254,6 +264,13 @@ export default function Transacoes() {
             >
               Período
             </button>
+            <button
+              type="button"
+              className={`botao-alternador${modoFiltro === "tudo" ? " botao-alternador-ativo" : ""}`}
+              onClick={() => setModoFiltro("tudo")}
+            >
+              Todas
+            </button>
           </div>
 
           {modoFiltro === "mes" ? (
@@ -262,7 +279,7 @@ export default function Transacoes() {
               value={mesSelecionado}
               onChange={(e) => setMesSelecionado(e.target.value)}
             />
-          ) : (
+          ) : modoFiltro === "personalizado" ? (
             <>
               <label className="rotulo-checkbox">
                 De
@@ -273,7 +290,7 @@ export default function Transacoes() {
                 <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
               </label>
             </>
-          )}
+          ) : null}
         </div>
 
         <div className="acoes-linha">
