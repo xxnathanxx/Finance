@@ -73,7 +73,7 @@ export default function Login({ onLoggedIn }: Props) {
     <div className="tela-login">
       <div className="cartao-login">
         <div className="cabecalho-login">
-          <div className="titulo-login">Finance Pro</div>
+          <div className="titulo-login">Órbita</div>
           <p className="subtitulo-login">
             {modo === "entrar" ? "Entre para continuar" : "Crie sua conta"}
           </p>
