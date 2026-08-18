@@ -1,5 +1,12 @@
-import { useState } from "react";
-import { login, me, registrar } from "../lib/auth";
+import { useEffect, useState } from "react";
+import {
+  limparCredenciaisLembradas,
+  login,
+  me,
+  obterCredenciaisLembradas,
+  registrar,
+  salvarCredenciaisLembradas,
+} from "../lib/auth";
 import type { UserOut } from "../lib/auth";
 
 type Props = {
@@ -14,8 +21,18 @@ export default function Login({ onLoggedIn }: Props) {
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [lembrar, setLembrar] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const lembradas = obterCredenciaisLembradas();
+    if (lembradas) {
+      setEmail(lembradas.email);
+      setSenha(lembradas.password);
+      setLembrar(true);
+    }
+  }, []);
 
   function alternarModo() {
     setModo((m) => (m === "entrar" ? "cadastrar" : "entrar"));
@@ -32,6 +49,13 @@ export default function Login({ onLoggedIn }: Props) {
         await registrar(email, senha, nome);
       }
       await login(email, senha);
+
+      if (lembrar) {
+        salvarCredenciaisLembradas(email, senha);
+      } else {
+        limparCredenciaisLembradas();
+      }
+
       const user = await me();
       onLoggedIn(user);
     } catch (err: any) {
@@ -85,6 +109,15 @@ export default function Login({ onLoggedIn }: Props) {
               placeholder="********"
             />
           </div>
+
+          <label className="rotulo-checkbox rotulo-checkbox-login">
+            <input
+              type="checkbox"
+              checked={lembrar}
+              onChange={(e) => setLembrar(e.target.checked)}
+            />
+            Lembrar usuário e senha
+          </label>
 
           {error && <div className="aviso aviso-erro">{error}</div>}
 

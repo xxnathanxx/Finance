@@ -45,6 +45,31 @@ export async function registrar(email: string, password: string, name: string): 
   return res.data;
 }
 
+// "Lembrar de mim": salva email/senha localmente pra pré-preencher o login.
+// Uso pensado pra um app 100% local e de uso pessoal - não é um app
+// multiusuário/exposto na internet.
+const CREDENCIAIS_KEY = "finance.credenciais_lembradas";
+
+export type CredenciaisLembradas = { email: string; password: string };
+
+export function salvarCredenciaisLembradas(email: string, password: string): void {
+  localStorage.setItem(CREDENCIAIS_KEY, JSON.stringify({ email, password }));
+}
+
+export function obterCredenciaisLembradas(): CredenciaisLembradas | null {
+  const raw = localStorage.getItem(CREDENCIAIS_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as CredenciaisLembradas;
+  } catch {
+    return null;
+  }
+}
+
+export function limparCredenciaisLembradas(): void {
+  localStorage.removeItem(CREDENCIAIS_KEY);
+}
+
 // ME: usa api (vai com Authorization automaticamente)
 export async function me(): Promise<UserOut> {
   const res = await api.get<UserOut>("/auth/me");

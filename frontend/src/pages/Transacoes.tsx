@@ -174,6 +174,39 @@ export default function Transacoes() {
     return `${dia}/${mes}/${ano}`;
   }
 
+  function exportarCSV() {
+    const cabecalho = ["Data", "Descrição", "Categoria", "Tipo", "Valor"];
+
+    function escaparCampo(valor: string): string {
+      if (/[";\n]/.test(valor)) {
+        return `"${valor.replace(/"/g, '""')}"`;
+      }
+      return valor;
+    }
+
+    const linhas = transacoesDoMes.map((t) =>
+      [
+        formatarData(t.date),
+        escaparCampo(t.description),
+        escaparCampo(t.category?.name ?? "Sem categoria"),
+        t.type === "income" ? "Receita" : "Despesa",
+        t.amount.toFixed(2).replace(".", ","),
+      ].join(";")
+    );
+
+    const conteudo = "﻿" + [cabecalho.join(";"), ...linhas].join("\r\n");
+    const blob = new Blob([conteudo], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `transacoes-${mesSelecionado}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div>
       <div className="cabecalho-pagina">
@@ -193,9 +226,18 @@ export default function Transacoes() {
           </label>
         </div>
 
-        <button className="botao botao-secundario" onClick={carregar} disabled={loading}>
-          {loading ? "Atualizando..." : "Recarregar"}
-        </button>
+        <div className="acoes-linha">
+          <button
+            className="botao botao-secundario"
+            onClick={exportarCSV}
+            disabled={transacoesDoMes.length === 0}
+          >
+            Exportar CSV
+          </button>
+          <button className="botao botao-secundario" onClick={carregar} disabled={loading}>
+            {loading ? "Atualizando..." : "Recarregar"}
+          </button>
+        </div>
       </div>
 
       <form className="formulario-transacao" onSubmit={criarTransacao}>
