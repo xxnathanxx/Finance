@@ -82,6 +82,7 @@ button:focus-visible {
 input[type="text"],
 input[type="password"],
 input[type="email"],
+input[type="month"],
 input:not([type]) {
   font-family: inherit;
   font-size: 0.95em;
@@ -89,6 +90,7 @@ input:not([type]) {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
+  padding: 8px 10px;
   transition: border-color 0.15s ease;
 }
 input:focus {

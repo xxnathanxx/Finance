@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Login from "./pages/Login";
 import Categories from "./pages/Categories";
+import Relatorio from "./pages/Relatorio";
 import { isLoggedIn, logout, me } from "./lib/auth";
 import type { UserOut } from "./lib/auth";
 import "./App.css";
@@ -11,8 +12,11 @@ type AppState =
   | { status: "loggedIn"; user: UserOut }
   | { status: "error"; message: string };
 
+type Aba = "categorias" | "relatorio";
+
 export default function App() {
   const [state, setState] = useState<AppState>({ status: "loading" });
+  const [abaAtiva, setAbaAtiva] = useState<Aba>("categorias");
 
   async function loadSession() {
     if (!isLoggedIn()) {
@@ -84,8 +88,23 @@ export default function App() {
         </div>
       </header>
 
+      <nav className="navegacao-abas">
+        <button
+          className={`aba-botao${abaAtiva === "categorias" ? " aba-ativa" : ""}`}
+          onClick={() => setAbaAtiva("categorias")}
+        >
+          Categorias
+        </button>
+        <button
+          className={`aba-botao${abaAtiva === "relatorio" ? " aba-ativa" : ""}`}
+          onClick={() => setAbaAtiva("relatorio")}
+        >
+          Relatório
+        </button>
+      </nav>
+
       <main className="conteudo-app">
-        <Categories />
+        {abaAtiva === "categorias" ? <Categories /> : <Relatorio />}
       </main>
     </div>
   );
