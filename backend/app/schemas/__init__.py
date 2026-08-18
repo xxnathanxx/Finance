@@ -155,6 +155,43 @@ class PeriodSummary(BaseSchema):
 
 
 # =========================
+# Importação de fatura/conta
+# =========================
+
+class ItemImportado(BaseSchema):
+    descricao: str
+    valor: float
+    data: dt.date
+    tipo: str = Field(..., pattern="^(income|expense)$")
+    category_id: Optional[int] = None
+    category_name: Optional[str] = None
+    duplicada: bool = False
+    incluir: bool = True
+
+
+class PreviewImportacaoOut(BaseSchema):
+    nome_arquivo: str
+    itens: list[ItemImportado]
+    avisos: list[str] = []
+
+
+class ItemConfirmacaoIn(BaseSchema):
+    descricao: str = Field(..., min_length=1, max_length=140)
+    valor: float = Field(..., gt=0)
+    data: dt.date
+    tipo: str = Field(..., pattern="^(income|expense)$")
+    category_id: Optional[int] = Field(default=None, ge=1)
+
+
+class ConfirmarImportacaoIn(BaseSchema):
+    itens: list[ItemConfirmacaoIn] = Field(..., min_length=1)
+
+
+class ConfirmarImportacaoOut(BaseSchema):
+    criadas: int
+
+
+# =========================
 # Settings
 # =========================
 

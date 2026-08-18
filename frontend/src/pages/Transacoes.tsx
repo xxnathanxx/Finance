@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { formatarMoeda, mesAtualComoValorDeInput } from "../lib/formatacao";
+import ImportarFatura from "../components/ImportarFatura";
 
 type Categoria = {
   id: number;
@@ -58,6 +59,8 @@ export default function Transacoes() {
   const [editandoId, setEditandoId] = useState<number | null>(null);
   const [edicao, setEdicao] = useState<FormularioEdicao | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
+
+  const [importando, setImportando] = useState(false);
 
   async function carregar() {
     setLoading(true);
@@ -269,6 +272,9 @@ export default function Transacoes() {
         </div>
 
         <div className="acoes-linha">
+          <button className="botao botao-secundario" onClick={() => setImportando(true)}>
+            Importar fatura
+          </button>
           <button
             className="botao botao-secundario"
             onClick={exportarCSV}
@@ -281,6 +287,17 @@ export default function Transacoes() {
           </button>
         </div>
       </div>
+
+      {importando && (
+        <ImportarFatura
+          categorias={categorias}
+          aoFechar={() => setImportando(false)}
+          aoConcluir={() => {
+            setImportando(false);
+            carregar();
+          }}
+        />
+      )}
 
       <form className="formulario-transacao" onSubmit={criarTransacao}>
         <input

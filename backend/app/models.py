@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     Numeric,
     String,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
@@ -133,3 +134,35 @@ class Transaction(Base):
 
     user = relationship("User", back_populates="transactions")
     category = relationship("Category", back_populates="transactions")
+
+
+class ImportRule(Base):
+    """
+    Regra de classificação automática aprendida a partir de importações.
+    Quando o usuário confirma a categoria de um item importado, guardamos
+    aqui pra reconhecer o mesmo estabelecimento/conta nas próximas
+    importações sem precisar perguntar de novo.
+    """
+    __tablename__ = "import_rules"
+    __table_args__ = (UniqueConstraint("user_id", "keyword", name="uq_import_rules_user_keyword"),)
+
+    id = Column(Integer, primary_key=True)
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False)
+
+    # trecho normalizado (maiúsculo, sem números soltos) usado como
+    # substring pra reconhecer a descrição de futuras transações
+    keyword = Column(String(140), index=True, nullable=False)
+
+    category_id = Column(Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False)
+
+    created_at = Column(DateTime, nullable=False, default=dt.datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=dt.datetime.utcnow,
+        onupdate=dt.datetime.utcnow,
+    )
+
+    user = relationship("User")
+    category = relationship("Category")
