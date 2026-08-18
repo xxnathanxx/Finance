@@ -15,9 +15,37 @@ from app.schemas import CategorySummary, MonthlySummary, PeriodSummary
 router = APIRouter(prefix="/reports", tags=["Reports"])
 
 
+def _totais_e_categorias_por_tipo(
+    db: Session, user_id: int, start: dt.date, end: dt.date, tipo: str
+) -> list[CategorySummary]:
+    rows = (
+        db.query(
+            Transaction.category_id.label("category_id"),
+            Category.name.label("category_name"),
+            func.coalesce(func.sum(Transaction.value), 0).label("total"),
+        )
+        .outerjoin(Category, Category.id == Transaction.category_id)
+        .filter(Transaction.user_id == user_id)
+        .filter(Transaction.type == tipo)
+        .filter(Transaction.date >= start, Transaction.date < end)
+        .group_by(Transaction.category_id, Category.name)
+        .order_by(func.sum(Transaction.value).desc())
+        .all()
+    )
+
+    return [
+        CategorySummary(
+            category_id=r.category_id,
+            category_name=r.category_name,
+            total=float(r.total or 0),
+        )
+        for r in rows
+    ]
+
+
 def _resumo_periodo(db: Session, user_id: int, start: dt.date, end: dt.date):
     """
-    Totais e despesas por categoria para o intervalo [start, end).
+    Totais e categorias (despesas e receitas) para o intervalo [start, end).
     """
     totals = (
         db.query(
@@ -39,31 +67,10 @@ def _resumo_periodo(db: Session, user_id: int, start: dt.date, end: dt.date):
     total_expense = float(totals.total_expense or 0)
     balance = total_income - total_expense
 
-    rows = (
-        db.query(
-            Transaction.category_id.label("category_id"),
-            Category.name.label("category_name"),
-            func.coalesce(func.sum(Transaction.value), 0).label("total"),
-        )
-        .outerjoin(Category, Category.id == Transaction.category_id)
-        .filter(Transaction.user_id == user_id)
-        .filter(Transaction.type == "expense")
-        .filter(Transaction.date >= start, Transaction.date < end)
-        .group_by(Transaction.category_id, Category.name)
-        .order_by(func.sum(Transaction.value).desc())
-        .all()
-    )
+    expenses_by_category = _totais_e_categorias_por_tipo(db, user_id, start, end, "expense")
+    income_by_category = _totais_e_categorias_por_tipo(db, user_id, start, end, "income")
 
-    expenses_by_category = [
-        CategorySummary(
-            category_id=r.category_id,
-            category_name=r.category_name,
-            total=float(r.total or 0),
-        )
-        for r in rows
-    ]
-
-    return total_income, total_expense, balance, expenses_by_category
+    return total_income, total_expense, balance, expenses_by_category, income_by_category
 
 
 @router.get("/monthly/{year}/{month}", response_model=MonthlySummary)
@@ -83,7 +90,7 @@ def monthly_report(
     else:
         end = dt.date(year, month + 1, 1)
 
-    total_income, total_expense, balance, expenses_by_category = _resumo_periodo(
+    total_income, total_expense, balance, expenses_by_category, income_by_category = _resumo_periodo(
         db, current_user.id, start, end
     )
 
@@ -93,6 +100,7 @@ def monthly_report(
         total_expense=total_expense,
         balance=balance,
         expenses_by_category=expenses_by_category,
+        income_by_category=income_by_category,
     )
 
 
@@ -113,7 +121,7 @@ def period_report(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Data final deve ser depois da inicial"
         )
 
-    total_income, total_expense, balance, expenses_by_category = _resumo_periodo(
+    total_income, total_expense, balance, expenses_by_category, income_by_category = _resumo_periodo(
         db, current_user.id, start, end
     )
 
@@ -124,4 +132,5 @@ def period_report(
         total_expense=total_expense,
         balance=balance,
         expenses_by_category=expenses_by_category,
+        income_by_category=income_by_category,
     )

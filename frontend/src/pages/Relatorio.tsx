@@ -14,6 +14,7 @@ type ResumoMensal = {
   total_expense: number;
   balance: number;
   expenses_by_category: ResumoCategoria[];
+  income_by_category: ResumoCategoria[];
 };
 
 type ResumoPeriodo = {
@@ -23,6 +24,7 @@ type ResumoPeriodo = {
   total_expense: number;
   balance: number;
   expenses_by_category: ResumoCategoria[];
+  income_by_category: ResumoCategoria[];
 };
 
 type ResumoCarregado = {
@@ -31,26 +33,37 @@ type ResumoCarregado = {
   total_expense: number;
   balance: number;
   expenses_by_category: ResumoCategoria[];
+  income_by_category: ResumoCategoria[];
 };
 
 type Configuracoes = {
   monthly_goal: number | null;
 };
 
-const CORES_CATEGORIA = [
+const CORES_DESPESA = [
   "#3987e5", // azul
   "#d95926", // laranja
   "#199e70", // água-marinha
   "#c98500", // amarelo
   "#d55181", // magenta
-  "#22d97a", // verde
   "#9085e9", // violeta
+  "#e66767", // vermelho
+];
+const CORES_RECEITA = [
+  "#22d97a", // verde
+  "#16a866", // verde escuro
+  "#5eead4", // verde-água claro
+  "#84cc16", // verde-lima
+  "#0d9488", // teal
+  "#4ade80", // verde claro
+  "#059669", // esmeralda
 ];
 const COR_OUTRAS = "#6b7280";
 const MAX_CATEGORIAS_EXIBIDAS = 7;
 
 type TipoGrafico = "pizza" | "barras";
 type TipoPeriodo = "semanal" | "mensal" | "anual";
+type VisaoCategoria = "despesas" | "receitas";
 
 function dataParaSemanaISO(data: Date): string {
   const d = new Date(Date.UTC(data.getFullYear(), data.getMonth(), data.getDate()));
@@ -96,6 +109,7 @@ export default function Relatorio() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>("pizza");
+  const [visaoCategoria, setVisaoCategoria] = useState<VisaoCategoria>("despesas");
 
   const [meta, setMeta] = useState<number | null>(null);
   const [editandoMeta, setEditandoMeta] = useState(false);
@@ -180,9 +194,11 @@ export default function Relatorio() {
   const categorias = useMemo(() => {
     if (!resumo) return [];
 
-    const ordenadas = [...resumo.expenses_by_category]
-      .filter((c) => c.total > 0)
-      .sort((a, b) => b.total - a.total);
+    const listaBruta =
+      visaoCategoria === "despesas" ? resumo.expenses_by_category : resumo.income_by_category;
+    const paleta = visaoCategoria === "despesas" ? CORES_DESPESA : CORES_RECEITA;
+
+    const ordenadas = [...listaBruta].filter((c) => c.total > 0).sort((a, b) => b.total - a.total);
 
     const principais = ordenadas.slice(0, MAX_CATEGORIAS_EXIBIDAS);
     const restante = ordenadas.slice(MAX_CATEGORIAS_EXIBIDAS);
@@ -194,7 +210,7 @@ export default function Relatorio() {
       nome: c.category_name ?? "Sem categoria",
       total: c.total,
       percentual: (c.total / totalGeral) * 100,
-      cor: CORES_CATEGORIA[i % CORES_CATEGORIA.length],
+      cor: paleta[i % paleta.length],
     }));
 
     if (totalRestante > 0) {
@@ -207,7 +223,7 @@ export default function Relatorio() {
     }
 
     return linhas;
-  }, [resumo]);
+  }, [resumo, visaoCategoria]);
 
   const maiorValor = categorias.length > 0 ? categorias[0].total : 0;
 
@@ -388,9 +404,21 @@ export default function Relatorio() {
 
           <div className="cartao">
             <div className="cabecalho-cartao cabecalho-cartao-com-acoes">
-              <div>
-                <strong>Despesas por categoria</strong>
-                <span> · {resumo.rotulo}</span>
+              <div className="alternador-grafico">
+                <button
+                  type="button"
+                  className={`botao-alternador${visaoCategoria === "despesas" ? " botao-alternador-ativo botao-alternador-despesa" : ""}`}
+                  onClick={() => setVisaoCategoria("despesas")}
+                >
+                  Despesas
+                </button>
+                <button
+                  type="button"
+                  className={`botao-alternador${visaoCategoria === "receitas" ? " botao-alternador-ativo botao-alternador-receita" : ""}`}
+                  onClick={() => setVisaoCategoria("receitas")}
+                >
+                  Receitas
+                </button>
               </div>
 
               {categorias.length > 0 && (
@@ -413,13 +441,22 @@ export default function Relatorio() {
               )}
             </div>
 
+            <div className="cabecalho-cartao">
+              <strong>{visaoCategoria === "despesas" ? "Despesas" : "Receitas"} por categoria</strong>
+              <span> · {resumo.rotulo}</span>
+            </div>
+
             {categorias.length === 0 ? (
-              <div className="estado-vazio">Nenhuma despesa registrada nesse período.</div>
+              <div className="estado-vazio">
+                Nenhuma {visaoCategoria === "despesas" ? "despesa" : "receita"} registrada nesse período.
+              </div>
             ) : tipoGrafico === "pizza" ? (
               <div className="grafico-pizza-container">
                 <div className="grafico-pizza-donut" style={{ background: gradientePizza }}>
                   <div className="grafico-pizza-furo">
-                    <span className="grafico-pizza-furo-rotulo">Despesas</span>
+                    <span className="grafico-pizza-furo-rotulo">
+                      {visaoCategoria === "despesas" ? "Despesas" : "Receitas"}
+                    </span>
                     <span className="grafico-pizza-furo-valor">
                       {formatarMoeda(categorias.reduce((soma, c) => soma + c.total, 0))}
                     </span>
