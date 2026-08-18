@@ -272,7 +272,11 @@ class ItemBruto:
     descricao: str
     valor: Decimal
     data: dt.date
-    credito: bool = False  # linha negativa na fatura (pagamento/estorno)
+    credito: bool = False  # linha negativa na fatura (pagamento/estorno) ou receita (holerite)
+    # pagamento/estorno de fatura não vem marcado por padrão (geralmente não é um
+    # gasto/receita de verdade) - já boleto e holerite são documentos únicos que o
+    # usuário claramente quer importar, então esses vêm sempre marcados
+    incluir_por_padrao: bool = True
 
 
 # =========================
@@ -503,7 +507,11 @@ def _extrair_linhas_pdf_fatura(paginas_texto: list[str], ano_ref: int | None, me
                 continue
 
             credito = _resolver_credito(m.group("sinal_pre"), m.group("sinal_pos"))
-            itens.append(ItemBruto(descricao=descricao, valor=abs(valor), data=data, credito=credito))
+            itens.append(
+                ItemBruto(
+                    descricao=descricao, valor=abs(valor), data=data, credito=credito, incluir_por_padrao=not credito
+                )
+            )
 
     return itens
 
@@ -535,6 +543,68 @@ def _extrair_boleto_pdf(texto_completo: str) -> ItemBruto | None:
     return ItemBruto(descricao=descricao, valor=abs(valor), data=data, credito=False)
 
 
+# =========================
+# PDF - holerite (contracheque)
+#
+# O rótulo do valor líquido muda de empresa pra empresa (depende do
+# sistema de folha de pagamento usado), então testamos vários
+# sinônimos comuns. A data usa o fim do período de referência
+# ("01/07/2026 a 31/07/2026") ou a competência ("07/2026"), já que o
+# holerite raramente traz a data exata do depósito.
+# =========================
+
+_VALOR_LIQUIDO_RE = re.compile(
+    r"(?:valor\s+l[ií]quido|l[ií]quido\s+a\s+receber|total\s+l[ií]quido|sal[áa]rio\s+l[ií]quido|"
+    r"l[ií]quido\s+receber|valor\s+a\s+receber|l[ií]quido)\s*[:\-]?\s*R?\$?\s*(\d{1,3}(?:\.\d{3})*,\d{2})",
+    re.IGNORECASE,
+)
+_PERIODO_HOLERITE_RE = re.compile(r"(\d{2}/\d{2}/\d{4})\s*a\s*(\d{2}/\d{2}/\d{4})")
+_COMPETENCIA_RE = re.compile(r"compet[êe]ncia[:\s]*(\d{2})[/\s](\d{4})", re.IGNORECASE)
+_EMPRESA_RE = re.compile(
+    r"\d{4,6}\s*([A-ZÀ-Ü][A-ZÀ-Ü0-9 .&/-]{3,60}?\s(?:LTDA|S\.?A\.?|EIRELI|ME|EPP)\b\.?)", re.IGNORECASE
+)
+_HOLERITE_PALAVRAS_CHAVE = ("demonstrativo de pagamento", "recibo de pagamento", "contracheque", "holerite")
+
+
+def _ultimo_dia_do_mes(ano: int, mes: int) -> dt.date:
+    proximo_mes_dia1 = dt.date(ano + 1, 1, 1) if mes == 12 else dt.date(ano, mes + 1, 1)
+    return proximo_mes_dia1 - dt.timedelta(days=1)
+
+
+def _extrair_holerite_pdf(texto_completo: str) -> ItemBruto | None:
+    normalizado = _normalizar(texto_completo)
+    if not any(palavra.upper() in normalizado for palavra in _HOLERITE_PALAVRAS_CHAVE):
+        return None
+
+    m_valor = _VALOR_LIQUIDO_RE.search(texto_completo)
+    if not m_valor:
+        return None
+    valor = _parse_valor_brl(m_valor.group(1))
+    if valor is None or valor == 0:
+        return None
+
+    data: dt.date | None = None
+    m_periodo = _PERIODO_HOLERITE_RE.search(texto_completo)
+    if m_periodo:
+        data = _parse_data(m_periodo.group(2))
+    if not data:
+        m_comp = _COMPETENCIA_RE.search(texto_completo)
+        if m_comp:
+            mes, ano = int(m_comp.group(1)), int(m_comp.group(2))
+            if 1 <= mes <= 12:
+                data = _ultimo_dia_do_mes(ano, mes)
+    if not data:
+        return None
+
+    descricao = "Salário"
+    m_empresa = _EMPRESA_RE.search(texto_completo)
+    if m_empresa:
+        nome_empresa = re.sub(r"\s+", " ", m_empresa.group(1)).strip()
+        descricao = f"Salário - {nome_empresa}"
+
+    return ItemBruto(descricao=descricao[:140], valor=abs(valor), data=data, credito=True)
+
+
 def _eh_erro_de_senha(e: Exception) -> bool:
     if isinstance(e, PDFPasswordIncorrect):
         return True
@@ -560,7 +630,13 @@ def _parsear_pdf(conteudo: bytes, ano_ref: int | None, mes_ref: int | None, senh
     if len(itens) >= 2:
         return itens
 
-    boleto = _extrair_boleto_pdf("\n".join(paginas_texto))
+    texto_completo = "\n".join(paginas_texto)
+
+    holerite = _extrair_holerite_pdf(texto_completo)
+    if holerite:
+        return [holerite]
+
+    boleto = _extrair_boleto_pdf(texto_completo)
     if boleto:
         return [boleto]
 
@@ -654,9 +730,7 @@ def processar_arquivo(
                 category_id=categoria.id if categoria else None,
                 category_name=categoria.name if categoria else None,
                 duplicada=duplicada,
-                # linhas de crédito (pagamento da fatura, estorno) não entram marcadas
-                # por padrão - geralmente não são um gasto/receita pessoal de verdade
-                incluir=not duplicada and not bruto.credito,
+                incluir=not duplicada and bruto.incluir_por_padrao,
             )
         )
 

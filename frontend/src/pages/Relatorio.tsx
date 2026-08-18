@@ -468,8 +468,8 @@ export default function Relatorio() {
                     <div key={cat.nome} className="legenda-item">
                       <span className="legenda-cor" style={{ backgroundColor: cat.cor }} />
                       <span className="legenda-nome">{cat.nome}</span>
-                      <span className="legenda-valor">
-                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}%
+                      <span className="legenda-valor" style={{ color: cat.cor }}>
+                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}% do total
                       </span>
                     </div>
                   ))}
@@ -481,8 +481,8 @@ export default function Relatorio() {
                   <div key={cat.nome} className="linha-barra">
                     <div className="rotulo-barra">
                       <span className="rotulo-barra-nome">{cat.nome}</span>
-                      <span className="rotulo-barra-valor">
-                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}%
+                      <span className="rotulo-barra-valor" style={{ color: cat.cor }}>
+                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}% do total
                       </span>
                     </div>
                     <div className="trilha-barra">

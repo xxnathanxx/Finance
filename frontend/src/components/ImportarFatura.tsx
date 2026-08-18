@@ -28,7 +28,7 @@ type PreviewImportacao = {
 type Props = {
   categorias: Categoria[];
   aoFechar: () => void;
-  aoConcluir: () => void;
+  aoConcluir: (periodoImportado: { inicio: string; fim: string }) => void;
 };
 
 const EXTENSOES_ACEITAS = ".csv,.xlsx,.xls,.pdf";
@@ -44,10 +44,23 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
   const [avisos, setAvisos] = useState<string[]>([]);
   const [itens, setItens] = useState<ItemImportado[] | null>(null);
   const [nomeArquivoAnalisado, setNomeArquivoAnalisado] = useState("");
+  const [mostrarDuplicadas, setMostrarDuplicadas] = useState(false);
 
   const categoriasAtivas = useMemo(() => categorias.filter((c) => c.is_active), [categorias]);
 
   const selecionados = useMemo(() => (itens ?? []).filter((i) => i.incluir), [itens]);
+
+  const itensComIndice = useMemo(
+    () => (itens ?? []).map((item, indice) => ({ item, indice })),
+    [itens]
+  );
+
+  const duplicadasCount = useMemo(() => itensComIndice.filter((x) => x.item.duplicada).length, [itensComIndice]);
+
+  const itensParaExibir = useMemo(
+    () => (mostrarDuplicadas ? itensComIndice : itensComIndice.filter((x) => !x.item.duplicada)),
+    [itensComIndice, mostrarDuplicadas]
+  );
 
   async function analisar() {
     if (!arquivo) return;
@@ -55,6 +68,7 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
     setAnalisando(true);
     setErro(null);
     setItens(null);
+    setMostrarDuplicadas(false);
 
     try {
       const formData = new FormData();
@@ -102,7 +116,9 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
           category_id: i.category_id,
         })),
       });
-      aoConcluir();
+
+      const datas = selecionados.map((i) => i.data).sort();
+      aoConcluir({ inicio: datas[0], fim: datas[datas.length - 1] });
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || "Falha ao confirmar a importação";
       setErro(msg);
@@ -116,10 +132,10 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
       <div className="modal-importacao" onClick={(e) => e.stopPropagation()}>
         <div className="cabecalho-modal">
           <div>
-            <h3>Importar fatura ou conta</h3>
+            <h3>Importar fatura, conta ou holerite</h3>
             <p className="subtitulo-pagina">
-              Envie o CSV/Excel do cartão, o PDF da fatura, ou o PDF de um boleto (luz, água, telefone...).
-              Nada é salvo até você revisar e confirmar.
+              Envie o CSV/Excel do cartão, o PDF da fatura, o PDF de um boleto (luz, água, telefone...) ou o
+              PDF do seu holerite. Nada é salvo até você revisar e confirmar.
             </p>
           </div>
           <button className="botao botao-secundario" onClick={aoFechar}>
@@ -139,6 +155,9 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
                   setPdfPrecisaSenha(false);
                   setSenhaPdf("");
                   setErro(null);
+                  // limpa o valor do input: se o navegador não fizer isso sozinho,
+                  // escolher o MESMO arquivo de novo depois não dispara onChange
+                  e.target.value = "";
                 }}
               />
             </label>
@@ -187,88 +206,109 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
                 <div className="resumo-importacao">
                   <strong>{selecionados.length}</strong> de {itens.length} serão importadas de{" "}
                   {nomeArquivoAnalisado}
+                  {duplicadasCount > 0 && (
+                    <>
+                      {" "}
+                      ·{" "}
+                      {mostrarDuplicadas ? (
+                        <button className="link-botao" onClick={() => setMostrarDuplicadas(false)}>
+                          ocultar {duplicadasCount} já importada(s) antes
+                        </button>
+                      ) : (
+                        <button className="link-botao" onClick={() => setMostrarDuplicadas(true)}>
+                          {duplicadasCount} já importada(s) antes estão ocultas - mostrar
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
 
-                <div className="tabela-importacao-wrapper">
-                  <table className="tabela-importacao">
-                    <thead>
-                      <tr>
-                        <th></th>
-                        <th>Data</th>
-                        <th>Descrição</th>
-                        <th>Valor</th>
-                        <th>Tipo</th>
-                        <th>Categoria</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {itens.map((item, indice) => (
-                        <tr key={indice} className={item.duplicada ? "linha-importacao-duplicada" : ""}>
-                          <td>
-                            <input
-                              type="checkbox"
-                              checked={item.incluir}
-                              onChange={(e) => atualizarItem(indice, { incluir: e.target.checked })}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="date"
-                              value={item.data}
-                              onChange={(e) => atualizarItem(indice, { data: e.target.value })}
-                            />
-                          </td>
-                          <td>
-                            <input
-                              className="campo-descricao-importacao"
-                              value={item.descricao}
-                              onChange={(e) => atualizarItem(indice, { descricao: e.target.value })}
-                            />
-                            {item.duplicada && <span className="selo-duplicada">possível duplicata</span>}
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              step="0.01"
-                              min="0"
-                              className="campo-valor-importacao"
-                              value={item.valor}
-                              onChange={(e) => atualizarItem(indice, { valor: Number(e.target.value) })}
-                            />
-                          </td>
-                          <td>
-                            <select
-                              value={item.tipo}
-                              onChange={(e) =>
-                                atualizarItem(indice, { tipo: e.target.value as "income" | "expense" })
-                              }
-                            >
-                              <option value="expense">Despesa</option>
-                              <option value="income">Receita</option>
-                            </select>
-                          </td>
-                          <td>
-                            <select
-                              value={item.category_id ?? ""}
-                              onChange={(e) =>
-                                atualizarItem(indice, {
-                                  category_id: e.target.value ? Number(e.target.value) : null,
-                                })
-                              }
-                            >
-                              <option value="">Sem categoria</option>
-                              {categoriasAtivas.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.name}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
+                {itensParaExibir.length === 0 ? (
+                  <div className="estado-vazio">
+                    Todas as transações desse arquivo já foram importadas antes.
+                  </div>
+                ) : (
+                  <div className="tabela-importacao-wrapper">
+                    <table className="tabela-importacao">
+                      <thead>
+                        <tr>
+                          <th></th>
+                          <th>Data</th>
+                          <th>Descrição</th>
+                          <th>Valor</th>
+                          <th>Tipo</th>
+                          <th>Categoria</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {itensParaExibir.map(({ item, indice }) => (
+                          <tr key={indice} className={item.duplicada ? "linha-importacao-duplicada" : ""}>
+                            <td>
+                              <input
+                                type="checkbox"
+                                checked={item.incluir}
+                                onChange={(e) => atualizarItem(indice, { incluir: e.target.checked })}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="date"
+                                value={item.data}
+                                onChange={(e) => atualizarItem(indice, { data: e.target.value })}
+                              />
+                            </td>
+                            <td>
+                              <input
+                                className="campo-descricao-importacao"
+                                value={item.descricao}
+                                onChange={(e) => atualizarItem(indice, { descricao: e.target.value })}
+                              />
+                              {item.duplicada && <span className="selo-duplicada">possível duplicata</span>}
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                className="campo-valor-importacao"
+                                value={item.valor}
+                                onChange={(e) => atualizarItem(indice, { valor: Number(e.target.value) })}
+                              />
+                            </td>
+                            <td>
+                              <select
+                                value={item.tipo}
+                                onChange={(e) =>
+                                  atualizarItem(indice, { tipo: e.target.value as "income" | "expense" })
+                                }
+                              >
+                                <option value="expense">Despesa</option>
+                                <option value="income">Receita</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select
+                                value={item.category_id ?? ""}
+                                onChange={(e) =>
+                                  atualizarItem(indice, {
+                                    category_id: e.target.value ? Number(e.target.value) : null,
+                                  })
+                                }
+                              >
+                                <option value="">Sem categoria</option>
+                                {categoriasAtivas.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
 
                 <div className="rodape-modal">
                   <span className="subtitulo-pagina">
