@@ -19,6 +19,7 @@ OutputBaseFilename=OrbitaSetup
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+SetupIconFile=..\backend\assets\icone.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 
 [Languages]
@@ -37,3 +38,55 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+function GetUninstallString(): String;
+var
+  sUnInstPath: String;
+  sUnInstallString: String;
+begin
+  sUnInstPath := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}_is1';
+  sUnInstallString := '';
+  if not RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString);
+  Result := sUnInstallString;
+end;
+
+function IsJaInstalado(): Boolean;
+begin
+  Result := (GetUninstallString() <> '');
+end;
+
+procedure DesinstalarVersaoAnterior();
+var
+  sUnInstallString: String;
+  iResultCode: Integer;
+begin
+  sUnInstallString := GetUninstallString();
+  if sUnInstallString <> '' then
+  begin
+    sUnInstallString := RemoveQuotes(sUnInstallString);
+    Exec(sUnInstallString, '/SILENT /NORESTART /SUPPRESSMSGBOXES', '', SW_SHOW, ewWaitUntilTerminated, iResultCode);
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+var
+  Escolha: Integer;
+begin
+  Result := True;
+  if IsJaInstalado() then
+  begin
+    Escolha := MsgBox(
+      'O Órbita já está instalado nesse computador.' + #13#10 + #13#10 +
+      'Clique em "Sim" para remover a versão instalada antes de continuar (seus dados NÃO são apagados, ficam em %LOCALAPPDATA%\Orbita).' + #13#10 +
+      'Clique em "Não" para reinstalar por cima da versão atual.' + #13#10 + #13#10 +
+      'Cancelar fecha o instalador sem fazer nada.',
+      mbConfirmation, MB_YESNOCANCEL
+    );
+    if Escolha = IDYES then
+      DesinstalarVersaoAnterior()
+    else if Escolha = IDCANCEL then
+      Result := False;
+  end;
+end;

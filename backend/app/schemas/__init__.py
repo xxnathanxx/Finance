@@ -141,6 +141,7 @@ class MonthlySummary(BaseSchema):
     total_expense: float
     balance: float
     expenses_by_category: list[CategorySummary]
+    income_by_category: list[CategorySummary] = []
 
 
 class PeriodSummary(BaseSchema):
@@ -150,6 +151,7 @@ class PeriodSummary(BaseSchema):
     total_expense: float
     balance: float
     expenses_by_category: list[CategorySummary]
+    income_by_category: list[CategorySummary] = []
 
 
 # =========================

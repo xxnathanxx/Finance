@@ -528,6 +528,18 @@
   box-shadow: none;
 }
 
+.botao-alternador-despesa.botao-alternador-ativo,
+.botao-alternador-despesa.botao-alternador-ativo:hover {
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
+}
+
+.botao-alternador-receita.botao-alternador-ativo,
+.botao-alternador-receita.botao-alternador-ativo:hover {
+  background: rgba(34, 217, 122, 0.15);
+  color: var(--color-success);
+}
+
 /* ---------- Gráfico de pizza ---------- */
 
 .grafico-pizza-container {

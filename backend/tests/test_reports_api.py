@@ -32,9 +32,14 @@ def test_relatorio_mensal_com_mes_invalido_retorna_400(client, auth_headers):
 
 
 def test_relatorio_mensal_soma_receitas_e_despesas_do_mes(client, auth_headers):
-    categoria_id = _criar_categoria(client, auth_headers)
-    _criar_transacao(client, auth_headers, type="income", amount=3000.0, date="2026-08-01")
-    _criar_transacao(client, auth_headers, type="expense", amount=800.0, category_id=categoria_id, date="2026-08-10")
+    categoria_despesa_id = _criar_categoria(client, auth_headers, "Despesa Teste")
+    categoria_receita_id = _criar_categoria(client, auth_headers, "Receita Teste")
+    _criar_transacao(
+        client, auth_headers, type="income", amount=3000.0, category_id=categoria_receita_id, date="2026-08-01"
+    )
+    _criar_transacao(
+        client, auth_headers, type="expense", amount=800.0, category_id=categoria_despesa_id, date="2026-08-10"
+    )
     # fora do mês - não deve entrar na soma
     _criar_transacao(client, auth_headers, type="expense", amount=500.0, date="2026-07-20")
 
@@ -48,6 +53,9 @@ def test_relatorio_mensal_soma_receitas_e_despesas_do_mes(client, auth_headers):
     assert corpo["balance"] == 2200.0
     assert len(corpo["expenses_by_category"]) == 1
     assert corpo["expenses_by_category"][0]["total"] == 800.0
+    assert len(corpo["income_by_category"]) == 1
+    assert corpo["income_by_category"][0]["total"] == 3000.0
+    assert corpo["income_by_category"][0]["category_name"] == "Receita Teste"
 
 
 def test_relatorio_por_periodo_sem_autenticacao_retorna_401(client):
