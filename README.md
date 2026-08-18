@@ -34,7 +34,6 @@ pip install -r requirements.txt
 # DATABASE_URL=postgresql://finance:finance123@localhost:5432/finance
 # JWT_SECRET_KEY=uma-chave-secreta-com-pelo-menos-16-caracteres
 
-python create_tables.py
 uvicorn app.main:app --reload
 ```
 
@@ -58,4 +57,27 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-Os testes atuais cobrem `app/auth/security.py` (hash e verificação de senha, criação e validação de tokens JWT).
+Os testes atuais cobrem `app/auth/security.py` (hash e verificação de senha, criação e validação de tokens JWT), além de testes de integração para categorias e transações em `backend/tests/test_categories_api.py` e `backend/tests/test_transactions_api.py`.
+
+## App desktop (offline, sem navegador)
+
+Existe uma versão empacotada como `.exe` (Windows) pensada pra teste local: abre numa janela nativa própria (sem precisar de navegador), com um banco SQLite embutido - sem Postgres, Docker ou internet.
+
+Pra gerar o `.exe`:
+
+```bash
+cd frontend
+npm run build
+
+cd ../backend
+xcopy /E /I ..\frontend\dist frontend_dist   # no Windows; use `cp -r ../frontend/dist frontend_dist` no Linux/macOS
+pip install -r requirements-desktop.txt
+
+pyinstaller --name FinanceProDesktop --onefile --windowed ^
+  --add-data "frontend_dist;frontend_dist" ^
+  --hidden-import passlib.handlers.bcrypt ^
+  --hidden-import passlib.handlers.pbkdf2 ^
+  desktop_app.py
+```
+
+O executável fica em `backend/dist/FinanceProDesktop.exe`. Na primeira vez que roda, ele cria sozinho o banco em `%LOCALAPPDATA%\FinancePro\finance.db`, as tabelas, as categorias padrão, e um usuário admin (`admin@local.app` / `admin123456`, configurável nas variáveis de ambiente `ADMIN_EMAIL`/`ADMIN_PASSWORD` dentro de `desktop_app.py`).
