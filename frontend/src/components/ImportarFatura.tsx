@@ -37,6 +37,7 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [mesReferencia, setMesReferencia] = useState(mesAtualComoValorDeInput());
   const [senhaPdf, setSenhaPdf] = useState("");
+  const [pdfPrecisaSenha, setPdfPrecisaSenha] = useState(false);
   const [analisando, setAnalisando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -68,6 +69,9 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || "Falha ao analisar o arquivo";
       setErro(msg);
+      if (typeof msg === "string" && msg.toLowerCase().includes("senha")) {
+        setPdfPrecisaSenha(true);
+      }
     } finally {
       setAnalisando(false);
     }
@@ -130,7 +134,12 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
               <input
                 type="file"
                 accept={EXTENSOES_ACEITAS}
-                onChange={(e) => setArquivo(e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  setArquivo(e.target.files?.[0] ?? null);
+                  setPdfPrecisaSenha(false);
+                  setSenhaPdf("");
+                  setErro(null);
+                }}
               />
             </label>
             <label className="campo-formulario">
@@ -138,14 +147,15 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
               <input type="month" value={mesReferencia} onChange={(e) => setMesReferencia(e.target.value)} />
             </label>
 
-            {arquivo?.name.toLowerCase().endsWith(".pdf") && (
+            {pdfPrecisaSenha && (
               <label className="campo-formulario">
-                <span>Senha do PDF (só se ele for protegido)</span>
+                <span>Senha do PDF</span>
                 <input
                   type="password"
                   value={senhaPdf}
                   onChange={(e) => setSenhaPdf(e.target.value)}
-                  placeholder="Deixe em branco se não tiver senha"
+                  placeholder="Esse arquivo é protegido por senha"
+                  autoFocus
                 />
               </label>
             )}
