@@ -247,6 +247,10 @@
   cursor: pointer;
 }
 
+.rotulo-checkbox-login {
+  margin-bottom: 16px;
+}
+
 .linha-adicionar {
   display: flex;
   gap: 10px;
@@ -458,6 +462,119 @@
   height: 100%;
   border-radius: 999px;
   transition: width 0.25s ease;
+}
+
+/* ---------- Alternador de gráfico ---------- */
+
+.cabecalho-cartao-com-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.alternador-grafico {
+  display: flex;
+  gap: 4px;
+  background: #eef0f4;
+  border-radius: var(--radius-sm);
+  padding: 2px;
+}
+
+.botao-alternador {
+  border: none;
+  background: transparent;
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-radius: calc(var(--radius-sm) - 2px);
+}
+
+.botao-alternador:hover:not(:disabled) {
+  color: var(--color-text);
+  border-color: transparent;
+}
+
+.botao-alternador-ativo,
+.botao-alternador-ativo:hover {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ---------- Gráfico de pizza ---------- */
+
+.grafico-pizza-container {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 24px;
+  flex-wrap: wrap;
+}
+
+.grafico-pizza-donut {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.grafico-pizza-furo {
+  position: absolute;
+  inset: 26px;
+  background: var(--color-surface);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.grafico-pizza-furo-rotulo {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.grafico-pizza-furo-valor {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.grafico-pizza-legenda {
+  flex: 1;
+  min-width: 220px;
+  display: grid;
+  gap: 10px;
+}
+
+.legenda-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+}
+
+.legenda-cor {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legenda-nome {
+  flex: 1;
+  font-weight: 500;
+}
+
+.legenda-valor {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 /* ---------- Transações ---------- */

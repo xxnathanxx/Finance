@@ -28,11 +28,14 @@ const CORES_CATEGORIA = [
 const COR_OUTRAS = "#898781";
 const MAX_CATEGORIAS_EXIBIDAS = 7;
 
+type TipoGrafico = "pizza" | "barras";
+
 export default function Relatorio() {
   const [mesSelecionado, setMesSelecionado] = useState(mesAtualComoValorDeInput());
   const [resumo, setResumo] = useState<ResumoMensal | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>("pizza");
 
   async function carregar() {
     const [ano, mes] = mesSelecionado.split("-").map(Number);
@@ -90,6 +93,16 @@ export default function Relatorio() {
 
   const maiorValor = categorias.length > 0 ? categorias[0].total : 0;
 
+  const gradientePizza = useMemo(() => {
+    let acumulado = 0;
+    const trechos = categorias.map((cat) => {
+      const inicio = acumulado;
+      acumulado += cat.percentual;
+      return `${cat.cor} ${inicio}% ${acumulado}%`;
+    });
+    return `conic-gradient(${trechos.join(", ")})`;
+  }, [categorias]);
+
   return (
     <div>
       <div className="cabecalho-pagina">
@@ -136,13 +149,57 @@ export default function Relatorio() {
           </div>
 
           <div className="cartao">
-            <div className="cabecalho-cartao">
-              <strong>Despesas por categoria</strong>
-              <span> · {mesSelecionado}</span>
+            <div className="cabecalho-cartao cabecalho-cartao-com-acoes">
+              <div>
+                <strong>Despesas por categoria</strong>
+                <span> · {mesSelecionado}</span>
+              </div>
+
+              {categorias.length > 0 && (
+                <div className="alternador-grafico">
+                  <button
+                    type="button"
+                    className={`botao-alternador${tipoGrafico === "pizza" ? " botao-alternador-ativo" : ""}`}
+                    onClick={() => setTipoGrafico("pizza")}
+                  >
+                    Pizza
+                  </button>
+                  <button
+                    type="button"
+                    className={`botao-alternador${tipoGrafico === "barras" ? " botao-alternador-ativo" : ""}`}
+                    onClick={() => setTipoGrafico("barras")}
+                  >
+                    Barras
+                  </button>
+                </div>
+              )}
             </div>
 
             {categorias.length === 0 ? (
               <div className="estado-vazio">Nenhuma despesa registrada neste mês.</div>
+            ) : tipoGrafico === "pizza" ? (
+              <div className="grafico-pizza-container">
+                <div className="grafico-pizza-donut" style={{ background: gradientePizza }}>
+                  <div className="grafico-pizza-furo">
+                    <span className="grafico-pizza-furo-rotulo">Despesas</span>
+                    <span className="grafico-pizza-furo-valor">
+                      {formatarMoeda(categorias.reduce((soma, c) => soma + c.total, 0))}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grafico-pizza-legenda">
+                  {categorias.map((cat) => (
+                    <div key={cat.nome} className="legenda-item">
+                      <span className="legenda-cor" style={{ backgroundColor: cat.cor }} />
+                      <span className="legenda-nome">{cat.nome}</span>
+                      <span className="legenda-valor">
+                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : (
               <div className="grafico-barras">
                 {categorias.map((cat) => (
