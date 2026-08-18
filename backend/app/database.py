@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-import logging
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.settings import settings
-
-logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
@@ -29,24 +25,5 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
-    finally:
-        db.close()
-
-
-def init_db() -> None:
-    """
-    Cria tabelas e garante o ADMIN inicial.
-    """
-    # importa models para registrar mapeamento no Base.metadata
-    from app import models  # noqa: F401
-    from app.seed import ensure_admin
-
-    Base.metadata.create_all(bind=engine)
-
-    db = SessionLocal()
-    try:
-        ensure_admin(db)
-    except Exception as e:
-        logger.exception("Falha no init_db: %s", e)
     finally:
         db.close()
