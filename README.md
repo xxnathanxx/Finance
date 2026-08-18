@@ -74,6 +74,7 @@ xcopy /E /I ..\frontend\dist frontend_dist   # no Windows; use `cp -r ../fronten
 pip install -r requirements-desktop.txt
 
 pyinstaller --name OrbitaDesktop --onefile --windowed ^
+  --icon "assets/icone.ico" ^
   --add-data "frontend_dist;frontend_dist" ^
   --hidden-import passlib.handlers.bcrypt ^
   --hidden-import passlib.handlers.pbkdf2 ^
