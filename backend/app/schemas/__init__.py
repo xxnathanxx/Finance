@@ -66,6 +66,7 @@ class CategoryUpdate(BaseSchema):
 class CategoryOut(BaseSchema):
     id: int
     name: str
+    is_active: bool = True
 
 
 # =========================

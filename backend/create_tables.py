@@ -1,4 +1,4 @@
-from app.db import Base, engine
+from app.database import Base, engine
 import app.models  # garante que os models foram carregados
 
 
