@@ -15,6 +15,9 @@ backend/build/
 backend/dist/
 *.spec
 
+# Instalador (Inno Setup)
+installer/output/
+
 # Docker
 *.log
 
