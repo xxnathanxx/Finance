@@ -26,16 +26,27 @@ type FormularioEdicao = {
   data: string;
 };
 
+type ModoFiltro = "mes" | "personalizado";
+
 function hojeComoValorDeInput(): string {
   return new Date().toISOString().slice(0, 10);
+}
+
+function formatarData(data: string): string {
+  const [ano, mes, dia] = data.split("-");
+  return `${dia}/${mes}/${ano}`;
 }
 
 export default function Transacoes() {
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [mesSelecionado, setMesSelecionado] = useState(mesAtualComoValorDeInput());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [modoFiltro, setModoFiltro] = useState<ModoFiltro>("mes");
+  const [mesSelecionado, setMesSelecionado] = useState(mesAtualComoValorDeInput());
+  const [dataInicio, setDataInicio] = useState(hojeComoValorDeInput());
+  const [dataFim, setDataFim] = useState(hojeComoValorDeInput());
 
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
@@ -71,18 +82,24 @@ export default function Transacoes() {
     carregar();
   }, []);
 
-  const transacoesDoMes = useMemo(() => {
-    return transacoes
-      .filter((t) => t.date.startsWith(mesSelecionado))
-      .sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1));
-  }, [transacoes, mesSelecionado]);
+  const transacoesFiltradas = useMemo(() => {
+    const filtradas =
+      modoFiltro === "mes"
+        ? transacoes.filter((t) => t.date.startsWith(mesSelecionado))
+        : transacoes.filter((t) => t.date >= dataInicio && t.date <= dataFim);
+
+    return filtradas.sort((a, b) => (a.date === b.date ? b.id - a.id : a.date < b.date ? 1 : -1));
+  }, [transacoes, modoFiltro, mesSelecionado, dataInicio, dataFim]);
 
   const categoriasAtivas = useMemo(() => categorias.filter((c) => c.is_active), [categorias]);
 
-  const saldoDoMes = transacoesDoMes.reduce(
+  const saldoFiltrado = transacoesFiltradas.reduce(
     (soma, t) => soma + (t.type === "income" ? t.amount : -t.amount),
     0
   );
+
+  const rotuloPeriodo =
+    modoFiltro === "mes" ? mesSelecionado : `${formatarData(dataInicio)} a ${formatarData(dataFim)}`;
 
   async function criarTransacao(e: React.FormEvent) {
     e.preventDefault();
@@ -169,11 +186,6 @@ export default function Transacoes() {
     }
   }
 
-  function formatarData(data: string): string {
-    const [ano, mes, dia] = data.split("-");
-    return `${dia}/${mes}/${ano}`;
-  }
-
   function exportarCSV() {
     const cabecalho = ["Data", "Descrição", "Categoria", "Tipo", "Valor"];
 
@@ -184,7 +196,7 @@ export default function Transacoes() {
       return valor;
     }
 
-    const linhas = transacoesDoMes.map((t) =>
+    const linhas = transacoesFiltradas.map((t) =>
       [
         formatarData(t.date),
         escaparCampo(t.description),
@@ -198,9 +210,12 @@ export default function Transacoes() {
     const blob = new Blob([conteudo], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
+    const nomeArquivo =
+      modoFiltro === "mes" ? `transacoes-${mesSelecionado}.csv` : `transacoes-${dataInicio}_a_${dataFim}.csv`;
+
     const link = document.createElement("a");
     link.href = url;
-    link.download = `transacoes-${mesSelecionado}.csv`;
+    link.download = nomeArquivo;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -216,21 +231,48 @@ export default function Transacoes() {
 
       <div className="barra-ferramentas">
         <div className="barra-ferramentas-esquerda">
-          <label className="rotulo-checkbox">
-            Mês
+          <div className="alternador-grafico">
+            <button
+              type="button"
+              className={`botao-alternador${modoFiltro === "mes" ? " botao-alternador-ativo" : ""}`}
+              onClick={() => setModoFiltro("mes")}
+            >
+              Mês
+            </button>
+            <button
+              type="button"
+              className={`botao-alternador${modoFiltro === "personalizado" ? " botao-alternador-ativo" : ""}`}
+              onClick={() => setModoFiltro("personalizado")}
+            >
+              Período
+            </button>
+          </div>
+
+          {modoFiltro === "mes" ? (
             <input
               type="month"
               value={mesSelecionado}
               onChange={(e) => setMesSelecionado(e.target.value)}
             />
-          </label>
+          ) : (
+            <>
+              <label className="rotulo-checkbox">
+                De
+                <input type="date" value={dataInicio} onChange={(e) => setDataInicio(e.target.value)} />
+              </label>
+              <label className="rotulo-checkbox">
+                Até
+                <input type="date" value={dataFim} onChange={(e) => setDataFim(e.target.value)} />
+              </label>
+            </>
+          )}
         </div>
 
         <div className="acoes-linha">
           <button
             className="botao botao-secundario"
             onClick={exportarCSV}
-            disabled={transacoesDoMes.length === 0}
+            disabled={transacoesFiltradas.length === 0}
           >
             Exportar CSV
           </button>
@@ -278,14 +320,14 @@ export default function Transacoes() {
 
       <div className="cartao">
         <div className="cabecalho-cartao">
-          <strong>{transacoesDoMes.length}</strong> transação(ões) em {mesSelecionado}
-          <span> · saldo do mês: {formatarMoeda(saldoDoMes)}</span>
+          <strong>{transacoesFiltradas.length}</strong> transação(ões) em {rotuloPeriodo}
+          <span> · saldo do período: {formatarMoeda(saldoFiltrado)}</span>
         </div>
 
-        {transacoesDoMes.length === 0 ? (
-          <div className="estado-vazio">Nenhuma transação neste mês.</div>
+        {transacoesFiltradas.length === 0 ? (
+          <div className="estado-vazio">Nenhuma transação nesse período.</div>
         ) : (
-          transacoesDoMes.map((t) => {
+          transacoesFiltradas.map((t) => {
             const emEdicao = editandoId === t.id;
             const ocupado = busyId === t.id;
 
