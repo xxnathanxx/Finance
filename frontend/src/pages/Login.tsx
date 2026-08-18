@@ -33,15 +33,15 @@ export default function Login({ onLoggedIn }: Props) {
   }
 
   return (
-    <div className="login-screen">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-title">Finance Pro</div>
-          <p className="login-subtitle">Entre para continuar</p>
+    <div className="tela-login">
+      <div className="cartao-login">
+        <div className="cabecalho-login">
+          <div className="titulo-login">Finance Pro</div>
+          <p className="subtitulo-login">Entre para continuar</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="form-field">
+          <div className="campo-formulario">
             <label>Email</label>
             <input
               value={username}
@@ -50,7 +50,7 @@ export default function Login({ onLoggedIn }: Props) {
             />
           </div>
 
-          <div className="form-field">
+          <div className="campo-formulario">
             <label>Senha</label>
             <input
               value={password}
@@ -60,9 +60,9 @@ export default function Login({ onLoggedIn }: Props) {
             />
           </div>
 
-          {error && <div className="alert alert-error">{error}</div>}
+          {error && <div className="aviso aviso-erro">{error}</div>}
 
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+          <button type="submit" className="botao botao-primario botao-bloco" disabled={loading}>
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>

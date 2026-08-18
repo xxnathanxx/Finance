@@ -2,15 +2,15 @@
   min-height: 100vh;
 }
 
-/* ---------- App shell ---------- */
+/* ---------- Estrutura do app ---------- */
 
-.app-shell {
+.estrutura-app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.app-header {
+.cabecalho-app {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -19,13 +19,13 @@
   border-bottom: 1px solid var(--color-border);
 }
 
-.brand {
+.marca {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.brand-mark {
+.selo-marca {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -38,23 +38,23 @@
   font-size: 16px;
 }
 
-.brand-name {
+.nome-marca {
   font-weight: 700;
   font-size: 1.05rem;
 }
 
-.session-info {
+.info-sessao {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
-.session-user {
+.usuario-sessao {
   color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
-.role-badge {
+.selo-cargo {
   padding: 2px 8px;
   border-radius: 999px;
   background: var(--color-primary-soft);
@@ -63,7 +63,7 @@
   font-weight: 600;
 }
 
-.app-main {
+.conteudo-app {
   flex: 1;
   max-width: 960px;
   width: 100%;
@@ -71,7 +71,7 @@
   padding: 32px 24px;
 }
 
-.center-screen {
+.tela-central {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -81,7 +81,7 @@
 
 /* ---------- Login ---------- */
 
-.login-screen {
+.tela-login {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -89,7 +89,7 @@
   padding: 24px;
 }
 
-.login-card {
+.cartao-login {
   width: 100%;
   max-width: 380px;
   background: var(--color-surface);
@@ -99,39 +99,39 @@
   padding: 36px 32px;
 }
 
-.login-header {
+.cabecalho-login {
   text-align: center;
   margin-bottom: 24px;
 }
 
-.login-title {
+.titulo-login {
   font-size: 1.4rem;
   font-weight: 700;
 }
 
-.login-subtitle {
+.subtitulo-login {
   margin-top: 6px;
   color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
-.form-field {
+.campo-formulario {
   display: grid;
   gap: 6px;
   margin-bottom: 16px;
 }
 
-.form-field label {
+.campo-formulario label {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-muted);
 }
 
-.form-field input {
+.campo-formulario input {
   padding: 10px 12px;
 }
 
-.btn {
+.botao {
   border-radius: var(--radius-sm);
   padding: 10px 16px;
   font-weight: 600;
@@ -140,68 +140,68 @@
   transition: all 0.15s ease;
 }
 
-.btn-primary {
+.botao-primario {
   background: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
 }
-.btn-primary:hover:not(:disabled) {
+.botao-primario:hover:not(:disabled) {
   background: var(--color-primary-hover);
   border-color: var(--color-primary-hover);
   color: white;
 }
 
-.btn-block {
+.botao-bloco {
   width: 100%;
 }
 
-.btn-ghost {
+.botao-secundario {
   background: transparent;
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
-.btn-danger {
+.botao-perigo {
   background: transparent;
   border-color: var(--color-border);
   color: var(--color-danger);
 }
-.btn-danger:hover:not(:disabled) {
+.botao-perigo:hover:not(:disabled) {
   border-color: var(--color-danger);
   color: var(--color-danger);
 }
 
-.alert {
+.aviso {
   padding: 10px 12px;
   border-radius: var(--radius-sm);
   font-size: 0.9rem;
   margin-bottom: 16px;
 }
 
-.alert-error {
+.aviso-erro {
   background: var(--color-danger-soft);
   color: var(--color-danger);
   border: 1px solid rgba(220, 38, 38, 0.2);
 }
 
-/* ---------- Categories page ---------- */
+/* ---------- Página de Categorias ---------- */
 
-.page-header {
+.cabecalho-pagina {
   margin-bottom: 20px;
 }
 
-.page-title {
+.titulo-pagina {
   font-size: 1.5rem;
   font-weight: 700;
 }
 
-.page-subtitle {
+.subtitulo-pagina {
   margin-top: 4px;
   color: var(--color-text-muted);
   font-size: 0.92rem;
 }
 
-.toolbar {
+.barra-ferramentas {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -210,13 +210,13 @@
   margin-bottom: 16px;
 }
 
-.toolbar-left {
+.barra-ferramentas-esquerda {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.checkbox-label {
+.rotulo-checkbox {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -226,19 +226,19 @@
   cursor: pointer;
 }
 
-.add-row {
+.linha-adicionar {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
 
-.add-row input {
+.linha-adicionar input {
   flex: 1;
   max-width: 320px;
   padding: 10px 12px;
 }
 
-.card {
+.cartao {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -246,7 +246,7 @@
   overflow: hidden;
 }
 
-.card-header {
+.cabecalho-cartao {
   padding: 14px 18px;
   background: #fafbfd;
   border-bottom: 1px solid var(--color-border);
@@ -254,17 +254,17 @@
   color: var(--color-text-muted);
 }
 
-.card-header strong {
+.cabecalho-cartao strong {
   color: var(--color-text);
 }
 
-.empty-state {
+.estado-vazio {
   padding: 32px 18px;
   text-align: center;
   color: var(--color-text-muted);
 }
 
-.category-row {
+.linha-categoria {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -273,36 +273,36 @@
   transition: background-color 0.15s ease;
 }
 
-.category-row:last-child {
+.linha-categoria:last-child {
   border-bottom: none;
 }
 
-.category-row:hover {
+.linha-categoria:hover {
   background: #fafbfd;
 }
 
-.category-row.is-hidden {
+.linha-categoria.esta-oculta {
   opacity: 0.55;
 }
 
-.category-id {
+.id-categoria {
   width: 44px;
   color: var(--color-text-muted);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
 
-.category-name {
+.nome-categoria {
   flex: 1;
   font-weight: 500;
 }
 
-.category-name input {
+.nome-categoria input {
   width: 100%;
   padding: 8px 10px;
 }
 
-.badge-hidden {
+.selo-oculta {
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
@@ -314,7 +314,7 @@
   letter-spacing: 0.02em;
 }
 
-.row-actions {
+.acoes-linha {
   display: flex;
   gap: 8px;
 }
