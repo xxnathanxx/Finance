@@ -33,42 +33,40 @@ export default function Login({ onLoggedIn }: Props) {
   }
 
   return (
-    <div style={{ padding: 40, maxWidth: 420 }}>
-      <h1 style={{ marginBottom: 8 }}>Finance Pro</h1>
-      <p style={{ marginTop: 0, opacity: 0.7 }}>Entre para continuar</p>
+    <div className="login-screen">
+      <div className="login-card">
+        <div className="login-header">
+          <div className="login-title">Finance Pro</div>
+          <p className="login-subtitle">Entre para continuar</p>
+        </div>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>Email</span>
-          <input
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="email@exemplo.com"
-            style={{ padding: 10 }}
-          />
-        </label>
-
-        <label style={{ display: "grid", gap: 6 }}>
-          <span>Senha</span>
-          <input
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            type="password"
-            placeholder="********"
-            style={{ padding: 10 }}
-          />
-        </label>
-
-        {error && (
-          <div style={{ padding: 10, border: "1px solid #f5c2c7", background: "#f8d7da" }}>
-            {error}
+        <form onSubmit={handleSubmit}>
+          <div className="form-field">
+            <label>Email</label>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="email@exemplo.com"
+            />
           </div>
-        )}
 
-        <button type="submit" disabled={loading} style={{ padding: 10 }}>
-          {loading ? "Entrando..." : "Entrar"}
-        </button>
-      </form>
+          <div className="form-field">
+            <label>Senha</label>
+            <input
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="********"
+            />
+          </div>
+
+          {error && <div className="alert alert-error">{error}</div>}
+
+          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+            {loading ? "Entrando..." : "Entrar"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
