@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.auth.router import router as auth_router
 from app.auth.seed_admin import ensure_admin
-from app.database import SessionLocal
+from app.database import Base, SessionLocal, engine
 from app.routes.categories import router as categories_router
 from app.routes.reports import router as reports_router
 from app.routes.transactions import router as transactions_router
@@ -27,6 +27,8 @@ app.add_middleware(
 
 @app.on_event("startup")
 def on_startup() -> None:
+    Base.metadata.create_all(bind=engine)
+
     db = SessionLocal()
     try:
         ensure_admin(db)

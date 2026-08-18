@@ -9,6 +9,12 @@ venv/
 # Node
 node_modules/
 
+# Desktop build (PyInstaller)
+backend/frontend_dist/
+backend/build/
+backend/dist/
+*.spec
+
 # Docker
 *.log
 
