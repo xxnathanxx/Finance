@@ -83,7 +83,10 @@ input[type="text"],
 input[type="password"],
 input[type="email"],
 input[type="month"],
-input:not([type]) {
+input[type="date"],
+input[type="number"],
+input:not([type]),
+select {
   font-family: inherit;
   font-size: 0.95em;
   color: var(--color-text);
@@ -93,7 +96,8 @@ input:not([type]) {
   padding: 8px 10px;
   transition: border-color 0.15s ease;
 }
-input:focus {
+input:focus,
+select:focus {
   outline: none;
   border-color: var(--color-primary);
 }

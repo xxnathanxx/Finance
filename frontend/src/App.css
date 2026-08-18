@@ -438,3 +438,110 @@
   border-radius: 999px;
   transition: width 0.25s ease;
 }
+
+/* ---------- Transações ---------- */
+
+.formulario-transacao {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.formulario-transacao .campo-descricao {
+  flex: 2;
+  min-width: 180px;
+}
+
+.formulario-transacao .campo-valor {
+  flex: 1;
+  min-width: 100px;
+}
+
+.formulario-transacao select,
+.formulario-transacao input[type="date"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.linha-transacao {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.linha-transacao:last-child {
+  border-bottom: none;
+}
+
+.linha-transacao:hover {
+  background: #fafbfd;
+}
+
+.linha-transacao-edicao {
+  flex-wrap: wrap;
+  background: var(--color-primary-soft);
+}
+
+.linha-transacao-edicao input,
+.linha-transacao-edicao select {
+  flex: 1;
+  min-width: 110px;
+}
+
+.transacao-data {
+  width: 84px;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.transacao-descricao {
+  flex: 1;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+.transacao-categoria {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  min-width: 100px;
+}
+
+.selo-tipo {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.selo-tipo-receita {
+  background: #e6f7ec;
+  color: #008300;
+}
+
+.selo-tipo-despesa {
+  background: #fdecec;
+  color: #e34948;
+}
+
+.transacao-valor {
+  width: 110px;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.valor-receita {
+  color: #008300;
+}
+
+.valor-despesa {
+  color: #e34948;
+}
