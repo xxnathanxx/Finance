@@ -318,3 +318,123 @@
   display: flex;
   gap: 8px;
 }
+
+/* ---------- Navegação por abas ---------- */
+
+.navegacao-abas {
+  display: flex;
+  gap: 4px;
+  padding: 0 32px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.aba-botao {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 14px 4px;
+  margin: 0 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid transparent;
+}
+
+.aba-botao:hover:not(:disabled) {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.aba-botao.aba-ativa {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+/* ---------- Relatório ---------- */
+
+.grade-resumo {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.cartao-resumo {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: 16px 18px;
+}
+
+.cartao-resumo-rotulo {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.cartao-resumo-valor {
+  font-size: 1.4rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.resumo-receita .cartao-resumo-valor {
+  color: #008300;
+}
+
+.resumo-despesa .cartao-resumo-valor {
+  color: #e34948;
+}
+
+.resumo-saldo-positivo .cartao-resumo-valor {
+  color: #008300;
+}
+
+.resumo-saldo-negativo .cartao-resumo-valor {
+  color: #e34948;
+}
+
+.grafico-barras {
+  padding: 18px;
+  display: grid;
+  gap: 16px;
+}
+
+.linha-barra {
+  display: grid;
+  gap: 6px;
+}
+
+.rotulo-barra {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.88rem;
+}
+
+.rotulo-barra-nome {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.rotulo-barra-valor {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.trilha-barra {
+  height: 10px;
+  border-radius: 999px;
+  background: #eef0f4;
+  overflow: hidden;
+}
+
+.preenchimento-barra {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.25s ease;
+}
