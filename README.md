@@ -81,3 +81,14 @@ pyinstaller --name FinanceProDesktop --onefile --windowed ^
 ```
 
 O executável fica em `backend/dist/FinanceProDesktop.exe`. Na primeira vez que roda, ele cria sozinho o banco em `%LOCALAPPDATA%\FinancePro\finance.db`, as tabelas, as categorias padrão, e um usuário admin (`admin@local.app` / `admin123456`, configurável nas variáveis de ambiente `ADMIN_EMAIL`/`ADMIN_PASSWORD` dentro de `desktop_app.py`).
+
+### Gerando o instalador (Inno Setup)
+
+O `.exe` acima é portátil (roda de onde estiver). Pra ter um instalador de verdade - com tela de escolha de pasta, atalho no menu iniciar, ícone opcional na área de trabalho e desinstalador registrado no Windows - use o script em `installer/FinanceProSetup.iss` com o [Inno Setup](https://jrsoftware.org/isinfo.php) (grátis):
+
+```bash
+# depois de gerar backend/dist/FinanceProDesktop.exe (passo acima)
+"C:\Program Files\Inno Setup 7\ISCC.exe" installer\FinanceProSetup.iss
+```
+
+O instalador final fica em `installer/output/FinanceProSetup.exe`. Ele não pede permissão de administrador (instala em `%LOCALAPPDATA%\Programs\FinancePro` por padrão, mas deixa escolher outra pasta).
