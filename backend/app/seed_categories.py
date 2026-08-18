@@ -18,6 +18,16 @@ DEFAULT_CATEGORIES: list[str] = [
     "Assinaturas",
     "Contas",
     "Outros",
+    "Salário",
+    "Investimentos",
+    "Presentes",
+    "Viagem",
+    "Pets",
+    "Seguros",
+    "Combustível",
+    "Cuidados pessoais",
+    "Doações",
+    "Impostos",
 ]
 
 
