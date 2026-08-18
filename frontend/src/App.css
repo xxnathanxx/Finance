@@ -15,7 +15,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 32px;
-  background: var(--color-surface);
+  background: rgba(10, 14, 26, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -32,7 +34,8 @@
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  box-shadow: var(--glow-primary-soft);
   color: white;
   font-weight: 700;
   font-size: 16px;
@@ -41,6 +44,11 @@
 .nome-marca {
   font-weight: 700;
   font-size: 1.05rem;
+  background: linear-gradient(135deg, #ffffff, var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.02em;
 }
 
 .info-sessao {
@@ -93,8 +101,10 @@
   width: 100%;
   max-width: 380px;
   background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-md), var(--glow-primary-soft);
   border: 1px solid var(--color-border);
   padding: 36px 32px;
 }
@@ -105,8 +115,12 @@
 }
 
 .titulo-login {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
+  background: linear-gradient(135deg, #ffffff, var(--color-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 .subtitulo-login {
@@ -142,13 +156,13 @@
   border: none;
   background: none;
   padding: 0;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: 600;
   cursor: pointer;
 }
 
 .link-botao:hover {
-  color: var(--color-primary-hover);
+  color: var(--color-primary);
   border-color: transparent;
 }
 
@@ -162,14 +176,15 @@
 }
 
 .botao-primario {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   color: white;
-  border-color: var(--color-primary);
+  border-color: transparent;
+  box-shadow: var(--glow-primary-soft);
 }
 .botao-primario:hover:not(:disabled) {
-  background: var(--color-primary-hover);
-  border-color: var(--color-primary-hover);
+  box-shadow: var(--glow-primary);
   color: white;
+  filter: brightness(1.08);
 }
 
 .botao-bloco {
@@ -177,19 +192,20 @@
 }
 
 .botao-secundario {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   border-color: var(--color-border);
   color: var(--color-text);
 }
 
 .botao-perigo {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
   border-color: var(--color-border);
   color: var(--color-danger);
 }
 .botao-perigo:hover:not(:disabled) {
   border-color: var(--color-danger);
   color: var(--color-danger);
+  box-shadow: 0 0 14px rgba(255, 92, 122, 0.3);
 }
 
 .aviso {
@@ -202,7 +218,7 @@
 .aviso-erro {
   background: var(--color-danger-soft);
   color: var(--color-danger);
-  border: 1px solid rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(255, 92, 122, 0.3);
 }
 
 /* ---------- Página de Categorias ---------- */
@@ -214,6 +230,7 @@
 .titulo-pagina {
   font-size: 1.5rem;
   font-weight: 700;
+  color: var(--color-text);
 }
 
 .subtitulo-pagina {
@@ -265,6 +282,8 @@
 
 .cartao {
   background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -273,7 +292,7 @@
 
 .cabecalho-cartao {
   padding: 14px 18px;
-  background: #fafbfd;
+  background: rgba(255, 255, 255, 0.03);
   border-bottom: 1px solid var(--color-border);
   font-size: 0.9rem;
   color: var(--color-text-muted);
@@ -303,11 +322,11 @@
 }
 
 .linha-categoria:hover {
-  background: #fafbfd;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .linha-categoria.esta-oculta {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .id-categoria {
@@ -331,7 +350,7 @@
   margin-left: 8px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: #f1f2f4;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--color-text-muted);
   font-size: 0.72rem;
   font-weight: 600;
@@ -350,7 +369,9 @@
   display: flex;
   gap: 4px;
   padding: 0 32px;
-  background: var(--color-surface);
+  background: rgba(10, 14, 26, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -368,11 +389,12 @@
 .aba-botao:hover:not(:disabled) {
   color: var(--color-text);
   border-color: var(--color-border);
+  box-shadow: none;
 }
 
 .aba-botao.aba-ativa {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 /* ---------- Relatório ---------- */
@@ -386,6 +408,8 @@
 
 .cartao-resumo {
   background: var(--color-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -406,19 +430,19 @@
 }
 
 .resumo-receita .cartao-resumo-valor {
-  color: #008300;
+  color: var(--color-success);
 }
 
 .resumo-despesa .cartao-resumo-valor {
-  color: #e34948;
+  color: var(--color-danger);
 }
 
 .resumo-saldo-positivo .cartao-resumo-valor {
-  color: #008300;
+  color: var(--color-success);
 }
 
 .resumo-saldo-negativo .cartao-resumo-valor {
-  color: #e34948;
+  color: var(--color-danger);
 }
 
 .grafico-barras {
@@ -454,7 +478,7 @@
 .trilha-barra {
   height: 10px;
   border-radius: 999px;
-  background: #eef0f4;
+  background: rgba(255, 255, 255, 0.07);
   overflow: hidden;
 }
 
@@ -476,7 +500,7 @@
 .alternador-grafico {
   display: flex;
   gap: 4px;
-  background: #eef0f4;
+  background: rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-sm);
   padding: 2px;
 }
@@ -494,13 +518,14 @@
 .botao-alternador:hover:not(:disabled) {
   color: var(--color-text);
   border-color: transparent;
+  box-shadow: none;
 }
 
 .botao-alternador-ativo,
 .botao-alternador-ativo:hover {
-  background: var(--color-surface);
-  color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-accent);
+  box-shadow: none;
 }
 
 /* ---------- Gráfico de pizza ---------- */
@@ -519,12 +544,13 @@
   height: 200px;
   border-radius: 50%;
   flex-shrink: 0;
+  box-shadow: 0 0 32px rgba(124, 92, 255, 0.25);
 }
 
 .grafico-pizza-furo {
   position: absolute;
   inset: 26px;
-  background: var(--color-surface);
+  background: var(--color-surface-solid);
   border-radius: 50%;
   display: flex;
   flex-direction: column;
@@ -577,6 +603,85 @@
   white-space: nowrap;
 }
 
+/* ---------- Meta mensal ---------- */
+
+.cartao-meta {
+  margin-bottom: 20px;
+  padding: 18px;
+}
+
+.cartao-meta-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.cartao-meta-titulo {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.cartao-meta-status {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.cartao-meta-status-atingida {
+  background: rgba(34, 217, 122, 0.15);
+  color: var(--color-success);
+}
+
+.cartao-meta-status-em-andamento {
+  background: var(--color-primary-soft);
+  color: var(--color-accent);
+}
+
+.cartao-meta-status-sem-meta {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+}
+
+.trilha-meta {
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.preenchimento-meta {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  box-shadow: var(--glow-primary-soft);
+}
+
+.preenchimento-meta-atingida {
+  background: linear-gradient(90deg, #16a866, var(--color-success));
+  box-shadow: 0 0 12px rgba(34, 217, 122, 0.4);
+}
+
+.cartao-meta-texto {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.form-editar-meta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.form-editar-meta input {
+  max-width: 160px;
+}
+
 /* ---------- Transações ---------- */
 
 .formulario-transacao {
@@ -615,7 +720,7 @@
 }
 
 .linha-transacao:hover {
-  background: #fafbfd;
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .linha-transacao-edicao {
@@ -659,13 +764,13 @@
 }
 
 .selo-tipo-receita {
-  background: #e6f7ec;
-  color: #008300;
+  background: rgba(34, 217, 122, 0.15);
+  color: var(--color-success);
 }
 
 .selo-tipo-despesa {
-  background: #fdecec;
-  color: #e34948;
+  background: var(--color-danger-soft);
+  color: var(--color-danger);
 }
 
 .transacao-valor {
@@ -677,9 +782,9 @@
 }
 
 .valor-receita {
-  color: #008300;
+  color: var(--color-success);
 }
 
 .valor-despesa {
-  color: #e34948;
+  color: var(--color-danger);
 }

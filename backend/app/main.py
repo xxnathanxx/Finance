@@ -8,6 +8,7 @@ from app.auth.seed_admin import ensure_admin
 from app.database import Base, SessionLocal, engine
 from app.routes.categories import router as categories_router
 from app.routes.reports import router as reports_router
+from app.routes.settings import router as settings_router
 from app.routes.transactions import router as transactions_router
 from app.seed_categories import ensure_default_categories
 
@@ -41,6 +42,7 @@ app.include_router(auth_router)
 app.include_router(categories_router)
 app.include_router(transactions_router)
 app.include_router(reports_router)
+app.include_router(settings_router)
 
 
 @app.get("/health", tags=["Health"])

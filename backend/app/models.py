@@ -47,6 +47,22 @@ class User(Base):
     )
 
 
+class UserSettings(Base):
+    """
+    Preferências do usuário que não fazem parte da conta em si.
+    Uma linha por usuário, criada só quando ele configura algo pela
+    primeira vez (não existe uma linha default criada no cadastro).
+    """
+    __tablename__ = "user_settings"
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+
+    # Meta de saldo positivo (receita - despesa) que o usuário quer bater todo mês.
+    monthly_goal = Column(Numeric(10, 2), nullable=True)
+
+    user = relationship("User")
+
+
 class RevokedToken(Base):
     """
     Revogação por JTI.

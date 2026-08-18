@@ -141,3 +141,24 @@ class MonthlySummary(BaseSchema):
     total_expense: float
     balance: float
     expenses_by_category: list[CategorySummary]
+
+
+class PeriodSummary(BaseSchema):
+    start_date: dt.date
+    end_date: dt.date
+    total_income: float
+    total_expense: float
+    balance: float
+    expenses_by_category: list[CategorySummary]
+
+
+# =========================
+# Settings
+# =========================
+
+class SettingsOut(BaseSchema):
+    monthly_goal: Optional[float] = None
+
+
+class SettingsUpdate(BaseSchema):
+    monthly_goal: float = Field(..., gt=0)
