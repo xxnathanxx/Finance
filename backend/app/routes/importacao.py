@@ -18,6 +18,7 @@ TAMANHO_MAXIMO_BYTES = 15 * 1024 * 1024  # 15 MB
 async def preview_importacao(
     file: UploadFile = File(...),
     mes_referencia: str | None = Form(default=None),
+    senha_pdf: str | None = Form(default=None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -36,7 +37,7 @@ async def preview_importacao(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Arquivo muito grande (máximo 15 MB).")
 
     try:
-        itens, avisos = processar_arquivo(db, current_user.id, nome_arquivo, conteudo, mes_referencia)
+        itens, avisos = processar_arquivo(db, current_user.id, nome_arquivo, conteudo, mes_referencia, senha_pdf)
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import io
 
+from fpdf import FPDF
+
 
 def _id_categoria(client, headers, nome: str) -> int:
     resposta = client.get("/categories", headers=headers)
@@ -15,6 +17,22 @@ def _id_categoria(client, headers, nome: str) -> int:
 def _upload_csv(client, headers, conteudo: str, nome_arquivo: str = "fatura.csv", mes_referencia: str | None = None):
     arquivos = {"file": (nome_arquivo, io.BytesIO(conteudo.encode("utf-8")), "text/csv")}
     dados = {"mes_referencia": mes_referencia} if mes_referencia else {}
+    return client.post("/import/preview", files=arquivos, data=dados, headers=headers)
+
+
+def _boleto_pdf_criptografado(senha: str) -> bytes:
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=12)
+    for linha in ("Cedente: CEMIG DISTRIBUICAO SA", "Vencimento: 15/09/2026", "Valor Documento: R$ 189,45"):
+        pdf.cell(0, 10, linha, new_x="LMARGIN", new_y="NEXT")
+    pdf.set_encryption(owner_password="dono-qualquer", user_password=senha)
+    return bytes(pdf.output())
+
+
+def _upload_pdf(client, headers, conteudo: bytes, nome_arquivo="boleto.pdf", senha_pdf: str | None = None):
+    arquivos = {"file": (nome_arquivo, io.BytesIO(conteudo), "application/pdf")}
+    dados = {"senha_pdf": senha_pdf} if senha_pdf else {}
     return client.post("/import/preview", files=arquivos, data=dados, headers=headers)
 
 
@@ -183,3 +201,28 @@ def test_preview_aceita_mes_referencia_para_datas_sem_ano(client, auth_headers):
     assert resposta.status_code == 200
     item = resposta.json()["itens"][0]
     assert item["data"] == "2026-08-15"
+
+
+def test_preview_pdf_protegido_sem_senha_pede_senha(client, auth_headers):
+    pdf_bytes = _boleto_pdf_criptografado("segredo123")
+    resposta = _upload_pdf(client, auth_headers, pdf_bytes)
+    assert resposta.status_code == 400
+    assert "senha" in resposta.json()["detail"].lower()
+
+
+def test_preview_pdf_protegido_com_senha_errada_retorna_400(client, auth_headers):
+    pdf_bytes = _boleto_pdf_criptografado("segredo123")
+    resposta = _upload_pdf(client, auth_headers, pdf_bytes, senha_pdf="chute-errado")
+    assert resposta.status_code == 400
+    assert "incorreta" in resposta.json()["detail"].lower()
+
+
+def test_preview_pdf_protegido_com_senha_certa_extrai_boleto(client, auth_headers):
+    pdf_bytes = _boleto_pdf_criptografado("segredo123")
+    resposta = _upload_pdf(client, auth_headers, pdf_bytes, senha_pdf="segredo123")
+    assert resposta.status_code == 200
+
+    item = resposta.json()["itens"][0]
+    assert item["valor"] == 189.45
+    assert item["data"] == "2026-09-15"
+    assert "CEMIG" in item["descricao"]

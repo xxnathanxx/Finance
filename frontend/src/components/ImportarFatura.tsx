@@ -36,6 +36,7 @@ const EXTENSOES_ACEITAS = ".csv,.xlsx,.xls,.pdf";
 export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Props) {
   const [arquivo, setArquivo] = useState<File | null>(null);
   const [mesReferencia, setMesReferencia] = useState(mesAtualComoValorDeInput());
+  const [senhaPdf, setSenhaPdf] = useState("");
   const [analisando, setAnalisando] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
       const formData = new FormData();
       formData.append("file", arquivo);
       if (mesReferencia) formData.append("mes_referencia", mesReferencia);
+      if (senhaPdf) formData.append("senha_pdf", senhaPdf);
 
       const res = await api.post<PreviewImportacao>("/import/preview", formData);
       setItens(res.data.itens);
@@ -135,6 +137,18 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
               <span>Mês de referência (usado quando o arquivo não tem o ano na data)</span>
               <input type="month" value={mesReferencia} onChange={(e) => setMesReferencia(e.target.value)} />
             </label>
+
+            {arquivo?.name.toLowerCase().endsWith(".pdf") && (
+              <label className="campo-formulario">
+                <span>Senha do PDF (só se ele for protegido)</span>
+                <input
+                  type="password"
+                  value={senhaPdf}
+                  onChange={(e) => setSenhaPdf(e.target.value)}
+                  placeholder="Deixe em branco se não tiver senha"
+                />
+              </label>
+            )}
 
             {erro && <div className="aviso aviso-erro">{erro}</div>}
 

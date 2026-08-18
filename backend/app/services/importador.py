@@ -24,6 +24,8 @@ from decimal import Decimal, InvalidOperation
 
 import openpyxl
 import pdfplumber
+from pdfminer.pdfdocument import PDFPasswordIncorrect
+from pdfplumber.utils.exceptions import PdfminerException
 from sqlalchemy.orm import Session
 
 from app.models import Category, ImportRule, Transaction
@@ -386,11 +388,39 @@ def _linha_para_item(valor_data, valor_descricao, valor_valor, ano_ref, mes_ref)
 
 # =========================
 # PDF - fatura com várias linhas
+#
+# Bancos diferentes formatam a linha de lançamento de jeitos bem
+# diferentes - testado contra faturas reais de Bradesco, Caixa e
+# Sicoob:
+#   - data numérica "dd/mm" ou nome do mês "dd MES" (ex: "30 JUL")
+#   - valor com "R$" ou sem, com separador de milhar por ponto
+#   - crédito/estorno indicado de formas diferentes: sinal "-" antes
+#     do valor (Sicoob: "-R$ 799,90"), sinal "-" depois do valor
+#     (Bradesco: "757,49-"), ou sufixo D/C colado no valor (Caixa:
+#     "77,42D" débito, "1.084,46C" crédito)
 # =========================
 
-_LINHA_FATURA_RE = re.compile(
-    r"^(?P<data>\d{2}/\d{2}(?:/\d{2,4})?)\s+(?P<descricao>.+?)\s+"
-    r"(?P<sinal>-\s?)?R?\$?\s?(?P<valor>\d{1,3}(?:\.\d{3})*,\d{2})\s*$"
+_MESES_ABREV = {
+    "JAN": 1, "FEV": 2, "MAR": 3, "ABR": 4, "MAI": 5, "JUN": 6,
+    "JUL": 7, "AGO": 8, "SET": 9, "OUT": 10, "NOV": 11, "DEZ": 12,
+}
+
+
+# Não ancora no fim da linha ($) de propósito: faturas com layout em
+# colunas (ex: Bradesco) às vezes colam uma segunda coluna sem relação
+# na mesma linha de texto extraído ("30/06 MERCADO 262,02 Compras R$
+# 4.996,88") - pegando o primeiro valor depois da descrição (e não o
+# último da linha) a gente acerta o valor real da transação.
+_FIM_LINHA_VALOR = r"\s+(?P<sinal_pre>-\s?)?R?\$?\s?(?P<valor>\d{1,3}(?:\.\d{3})*,\d{2})(?P<sinal_pos>[-DC])?"
+
+_LINHA_DATA_NUMERICA_RE = re.compile(
+    r"^(?P<data>\d{2}/\d{2}(?:/\d{2,4})?)\s+(?P<descricao>.+?)" + _FIM_LINHA_VALOR
+)
+
+_LINHA_DATA_MES_NOME_RE = re.compile(
+    r"^(?P<dia>\d{1,2})\s+(?P<mes_nome>JAN|FEV|MAR|ABR|MAI|JUN|JUL|AGO|SET|OUT|NOV|DEZ)\s+(?P<descricao>.+?)"
+    + _FIM_LINHA_VALOR,
+    re.IGNORECASE,
 )
 
 _LINHAS_IGNORAR = (
@@ -398,13 +428,27 @@ _LINHAS_IGNORAR = (
     "SALDO ATUAL",
     "TOTAL DA FATURA",
     "TOTAL DESTA FATURA",
+    "FATURA ANTERIOR",
     "LIMITE DISPONIVEL",
     "LIMITE TOTAL",
     "PAGAMENTO MINIMO",
+    "PAGAMENTOS RECEBIDOS",
+    "PAGAMENTO-BOLETO",
+    "PAGAMENTO BOLETO",
+    "PAGTO. POR DEB",
+    "OBRIGADO PELO PAGAMENTO",
     "TOTAL DE ENCARGOS",
     "VALOR TOTAL",
     "ENCARGOS DE ATRASO",
 )
+
+
+def _resolver_credito(sinal_pre: str | None, sinal_pos: str | None) -> bool:
+    if sinal_pre:
+        return True
+    if sinal_pos and sinal_pos.upper() in ("-", "C"):
+        return True
+    return False
 
 
 def _extrair_linhas_pdf_fatura(paginas_texto: list[str], ano_ref: int | None, mes_ref: int | None) -> list[ItemBruto]:
@@ -415,35 +459,50 @@ def _extrair_linhas_pdf_fatura(paginas_texto: list[str], ano_ref: int | None, me
             if not linha:
                 continue
 
-            m = _LINHA_FATURA_RE.match(linha)
-            if not m:
-                continue
+            m = _LINHA_DATA_NUMERICA_RE.match(linha)
+            if m:
+                data_txt = m.group("data")
+                if data_txt.count("/") == 1:
+                    dia, mes = map(int, data_txt.split("/"))
+                    if not (ano_ref and mes_ref):
+                        continue
+                    ano = _resolver_ano(mes, mes_ref, ano_ref)
+                else:
+                    partes = data_txt.split("/")
+                    dia, mes, ano = int(partes[0]), int(partes[1]), int(partes[2])
+                    if ano < 100:
+                        ano += 2000
+            else:
+                m = _LINHA_DATA_MES_NOME_RE.match(linha)
+                if not m:
+                    continue
+                dia = int(m.group("dia"))
+                mes = _MESES_ABREV[m.group("mes_nome").upper()]
+                if not (ano_ref and mes_ref):
+                    continue
+                ano = _resolver_ano(mes, mes_ref, ano_ref)
 
             descricao = m.group("descricao").strip()
+            if re.fullmatch(r"-?\s*R\$?", descricao, re.IGNORECASE) or not re.search(r"[A-Za-zÀ-ÿ]", descricao):
+                # só sobrou "R$"/"-R$" (ou nenhuma letra) - a descrição de
+                # verdade ficou numa coluna/linha separada no PDF original;
+                # sem ela não dá pra confiar nem no valor encontrado
+                continue
+
             normalizada = _normalizar(descricao)
             if any(ignorar in normalizada for ignorar in _LINHAS_IGNORAR):
                 continue
 
-            data_txt = m.group("data")
-            if data_txt.count("/") == 1:
-                dia, mes = map(int, data_txt.split("/"))
-                if not (ano_ref and mes_ref):
-                    continue
-                ano = _resolver_ano(mes, mes_ref, ano_ref)
-                try:
-                    data = dt.date(ano, mes, dia)
-                except ValueError:
-                    continue
-            else:
-                data = _parse_data(data_txt)
-                if not data:
-                    continue
+            try:
+                data = dt.date(ano, mes, dia)
+            except ValueError:
+                continue
 
             valor = _parse_valor_brl(m.group("valor"))
             if valor is None or valor == 0:
                 continue
 
-            credito = bool(m.group("sinal"))
+            credito = _resolver_credito(m.group("sinal_pre"), m.group("sinal_pos"))
             itens.append(ItemBruto(descricao=descricao, valor=abs(valor), data=data, credito=credito))
 
     return itens
@@ -476,11 +535,26 @@ def _extrair_boleto_pdf(texto_completo: str) -> ItemBruto | None:
     return ItemBruto(descricao=descricao, valor=abs(valor), data=data, credito=False)
 
 
-def _parsear_pdf(conteudo: bytes, ano_ref: int | None, mes_ref: int | None) -> list[ItemBruto]:
+def _eh_erro_de_senha(e: Exception) -> bool:
+    if isinstance(e, PDFPasswordIncorrect):
+        return True
+    if isinstance(e, PdfminerException) and e.args and isinstance(e.args[0], PDFPasswordIncorrect):
+        return True
+    return False
+
+
+def _parsear_pdf(conteudo: bytes, ano_ref: int | None, mes_ref: int | None, senha: str | None = None) -> list[ItemBruto]:
     paginas_texto: list[str] = []
-    with pdfplumber.open(io.BytesIO(conteudo)) as pdf:
-        for pagina in pdf.pages:
-            paginas_texto.append(pagina.extract_text() or "")
+    try:
+        with pdfplumber.open(io.BytesIO(conteudo), password=senha or "") as pdf:
+            for pagina in pdf.pages:
+                paginas_texto.append(pagina.extract_text() or "")
+    except Exception as e:
+        if _eh_erro_de_senha(e):
+            if senha:
+                raise ValueError("A senha informada está incorreta.")
+            raise ValueError("Esse PDF é protegido por senha. Informe a senha pra continuar.")
+        raise
 
     itens = _extrair_linhas_pdf_fatura(paginas_texto, ano_ref, mes_ref)
     if len(itens) >= 2:
@@ -497,10 +571,13 @@ def _parsear_pdf(conteudo: bytes, ano_ref: int | None, mes_ref: int | None) -> l
 # Duplicadas
 # =========================
 
-def _ja_existe_no_banco(db: Session, user_id: int, data: dt.date, valor: Decimal, descricao_normalizada: str) -> bool:
+def _ja_existe_no_banco(
+    db: Session, user_id: int, data: dt.date, valor: Decimal, descricao_normalizada: str, credito: bool
+) -> bool:
+    tipo_esperado = "income" if credito else "expense"
     candidatos = (
         db.query(Transaction)
-        .filter(Transaction.user_id == user_id, Transaction.date == data)
+        .filter(Transaction.user_id == user_id, Transaction.date == data, Transaction.type == tipo_esperado)
         .all()
     )
     for t in candidatos:
@@ -519,6 +596,7 @@ def processar_arquivo(
     nome_arquivo: str,
     conteudo: bytes,
     mes_referencia: str | None = None,
+    senha_pdf: str | None = None,
 ) -> tuple[list[ItemImportado], list[str]]:
     avisos: list[str] = []
     extensao = nome_arquivo.rsplit(".", 1)[-1].lower() if "." in nome_arquivo else ""
@@ -538,7 +616,7 @@ def processar_arquivo(
     elif extensao in ("xlsx", "xls"):
         brutos = _parsear_xlsx(conteudo, ano_ref, mes_ref)
     else:
-        brutos = _parsear_pdf(conteudo, ano_ref, mes_ref)
+        brutos = _parsear_pdf(conteudo, ano_ref, mes_ref, senha_pdf)
 
     if not brutos:
         avisos.append(
@@ -558,9 +636,11 @@ def processar_arquivo(
     for bruto in brutos:
         descricao = bruto.descricao.strip()[:140]
         normalizada = _normalizar(descricao)
-        chave = (bruto.data, bruto.valor, normalizada)
+        chave = (bruto.data, bruto.valor, normalizada, bruto.credito)
 
-        duplicada = chave in vistos_no_lote or _ja_existe_no_banco(db, user_id, bruto.data, bruto.valor, normalizada)
+        duplicada = chave in vistos_no_lote or _ja_existe_no_banco(
+            db, user_id, bruto.data, bruto.valor, normalizada, bruto.credito
+        )
         vistos_no_lote.add(chave)
 
         categoria = classificar(descricao, regras_usuario, categorias_por_nome)
@@ -574,7 +654,9 @@ def processar_arquivo(
                 category_id=categoria.id if categoria else None,
                 category_name=categoria.name if categoria else None,
                 duplicada=duplicada,
-                incluir=not duplicada,
+                # linhas de crédito (pagamento da fatura, estorno) não entram marcadas
+                # por padrão - geralmente não são um gasto/receita pessoal de verdade
+                incluir=not duplicada and not bruto.credito,
             )
         )
 

@@ -77,3 +77,57 @@ def test_extrai_boleto_pdf_sem_vencimento_retorna_none():
     texto = "Documento sem os campos esperados\nValor: 10,00\n"
     item = _extrair_boleto_pdf(texto)
     assert item is None
+
+
+# Padrões abaixo replicam formatos reais de fatura testados contra PDFs
+# de Bradesco, Caixa e Sicoob (ver histórico da importação).
+
+
+def test_extrai_linhas_com_sinal_negativo_depois_do_valor_formato_bradesco():
+    pagina = "10/07 KARSTEN S.A. BLUMENAU 449,99-\n"
+    itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
+
+    assert len(itens) == 1
+    assert itens[0].credito is True
+    assert float(itens[0].valor) == 449.99
+
+
+def test_extrai_linhas_com_sufixo_d_ou_c_formato_caixa():
+    pagina = "29/06 SUPERMERCADOS BH CONTAGEM 77,42D\n03/07 OBRIGADO PELO PAGAMENTO 1.084,46C\n"
+    itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
+
+    # a linha de agradecimento de pagamento é ignorada (não é um gasto)
+    assert len(itens) == 1
+    assert itens[0].descricao == "SUPERMERCADOS BH CONTAGEM"
+    assert itens[0].credito is False
+    assert float(itens[0].valor) == 77.42
+
+
+def test_extrai_linhas_com_data_por_extenso_formato_sicoob():
+    pagina = "31 JUL DL*UberRidesV Sao Paulo R$ 7,97\n30 JUL MERCADO*MERCADOLIVRE SAO PAULO -R$ 799,90\n"
+    itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
+
+    assert len(itens) == 2
+    assert itens[0].data == dt.date(2026, 7, 31)
+    assert itens[0].descricao == "DL*UberRidesV Sao Paulo"
+    assert itens[1].credito is True
+
+
+def test_extrai_primeiro_valor_quando_colunas_do_pdf_se_misturam_na_mesma_linha():
+    # layout em coluna dupla: a segunda coluna ("Compras R$ 4.996,88") não
+    # tem relação com a transação da esquerda - o valor certo é o primeiro
+    pagina = "30/06 SUPERMERCADOS BH CONTAGEM 262,02 Compras R$ 4.996,88\n"
+    itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
+
+    assert len(itens) == 1
+    assert itens[0].descricao == "SUPERMERCADOS BH CONTAGEM"
+    assert float(itens[0].valor) == 262.02
+
+
+def test_ignora_linha_sem_descricao_de_verdade_apos_quebra_de_coluna():
+    # a descrição real ("ANUIDADE MASTERCARD") ficou numa linha separada
+    # no PDF original - sem ela, só sobra "R$" antes do valor
+    pagina = "ANUIDADE MASTERCARD\n02 MAR R$ 35,50\n(5716) 05/12\n"
+    itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
+
+    assert len(itens) == 0
