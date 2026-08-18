@@ -28,7 +28,8 @@ Isso sobe um PostgreSQL em `localhost:5432` com o banco `finance` (usuário/senh
 cd backend
 python -m venv .venv
 .venv\Scripts\activate  # no Windows; use `source .venv/bin/activate` no Linux/macOS
-pip install fastapi uvicorn sqlalchemy alembic pydantic-settings psycopg2-binary python-jose passlib
+pip install fastapi uvicorn sqlalchemy alembic pydantic-settings psycopg2-binary python-jose passlib "bcrypt<4.0.0"
+# (bcrypt >=4.0 quebra o passlib ao gerar hashes de senha)
 
 # crie um arquivo .env em backend/ com as variáveis:
 # DATABASE_URL=postgresql://finance:finance123@localhost:5432/finance
@@ -49,3 +50,13 @@ npm run dev
 ```
 
 O frontend sobe em `http://localhost:5173` e já está configurado (via CORS no backend) para consumir a API local.
+
+## Testes
+
+```bash
+cd backend
+pip install pytest passlib "bcrypt<4.0.0" "python-jose[cryptography]"
+pytest
+```
+
+Os testes atuais cobrem `app/auth/security.py` (hash e verificação de senha, criação e validação de tokens JWT).
