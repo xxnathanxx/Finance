@@ -96,10 +96,15 @@ export default function Transacoes() {
 
   const categoriasAtivas = useMemo(() => categorias.filter((c) => c.is_active), [categorias]);
 
-  const saldoFiltrado = transacoesFiltradas.reduce(
-    (soma, t) => soma + (t.type === "income" ? t.amount : -t.amount),
-    0
-  );
+  const receitaFiltrada = transacoesFiltradas
+    .filter((t) => t.type === "income")
+    .reduce((soma, t) => soma + t.amount, 0);
+
+  const despesaFiltrada = transacoesFiltradas
+    .filter((t) => t.type === "expense")
+    .reduce((soma, t) => soma + t.amount, 0);
+
+  const saldoFiltrado = receitaFiltrada - despesaFiltrada;
 
   const rotuloPeriodo =
     modoFiltro === "mes" ? mesSelecionado : `${formatarData(dataInicio)} a ${formatarData(dataFim)}`;
@@ -292,8 +297,14 @@ export default function Transacoes() {
         <ImportarFatura
           categorias={categorias}
           aoFechar={() => setImportando(false)}
-          aoConcluir={() => {
+          aoConcluir={(periodoImportado) => {
             setImportando(false);
+            // troca pro período das transações que acabaram de ser importadas -
+            // senão elas podem cair fora do filtro de mês atual e parecer que
+            // a importação não funcionou
+            setModoFiltro("personalizado");
+            setDataInicio(periodoImportado.inicio);
+            setDataFim(periodoImportado.fim);
             carregar();
           }}
         />
@@ -335,10 +346,26 @@ export default function Transacoes() {
 
       {error && <div className="aviso aviso-erro">{error}</div>}
 
+      <div className="grade-resumo">
+        <div className="cartao-resumo resumo-receita">
+          <div className="cartao-resumo-rotulo">Total recebido</div>
+          <div className="cartao-resumo-valor">{formatarMoeda(receitaFiltrada)}</div>
+        </div>
+        <div className="cartao-resumo resumo-despesa">
+          <div className="cartao-resumo-rotulo">Total gasto</div>
+          <div className="cartao-resumo-valor">{formatarMoeda(despesaFiltrada)}</div>
+        </div>
+        <div
+          className={`cartao-resumo ${saldoFiltrado >= 0 ? "resumo-saldo-positivo" : "resumo-saldo-negativo"}`}
+        >
+          <div className="cartao-resumo-rotulo">Saldo do período</div>
+          <div className="cartao-resumo-valor">{formatarMoeda(saldoFiltrado)}</div>
+        </div>
+      </div>
+
       <div className="cartao">
         <div className="cabecalho-cartao">
           <strong>{transacoesFiltradas.length}</strong> transação(ões) em {rotuloPeriodo}
-          <span> · saldo do período: {formatarMoeda(saldoFiltrado)}</span>
         </div>
 
         {transacoesFiltradas.length === 0 ? (

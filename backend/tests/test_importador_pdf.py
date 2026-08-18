@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-from app.services.importador import _extrair_boleto_pdf, _extrair_linhas_pdf_fatura
+from app.services.importador import _extrair_boleto_pdf, _extrair_holerite_pdf, _extrair_linhas_pdf_fatura
 
 
 def test_extrai_linhas_de_fatura_pdf_com_data_completa():
@@ -131,3 +131,65 @@ def test_ignora_linha_sem_descricao_de_verdade_apos_quebra_de_coluna():
     itens = _extrair_linhas_pdf_fatura([pagina], ano_ref=2026, mes_ref=8)
 
     assert len(itens) == 0
+
+
+# Holerite - o rótulo do líquido e o layout mudam de empresa pra empresa
+# (depende do sistema de folha de pagamento), então testamos alguns
+# formatos/rótulos comuns.
+
+
+def test_extrai_holerite_com_rotulo_valor_liquido_e_periodo():
+    texto = (
+        "00098 EMPRESA EXEMPLO LTDA Demonstrativo de Pagamento de Salário\n"
+        "01/07/2026 a 31/07/2026 ADMINISTRACAO 00442351000152\n"
+        "001 Salário Base 3.058,05\n"
+        "903 INSS Folha 530,88\n"
+        "Valor Líquido 4.634,00\n"
+    )
+    item = _extrair_holerite_pdf(texto)
+
+    assert item is not None
+    assert float(item.valor) == 4634.00
+    assert item.data == dt.date(2026, 7, 31)
+    assert item.credito is True
+    assert item.incluir_por_padrao is True
+    assert "EMPRESA EXEMPLO LTDA" in item.descricao
+
+
+def test_extrai_holerite_com_rotulo_liquido_a_receber():
+    texto = (
+        "Recibo de Pagamento de Salário\n"
+        "01/08/2026 a 31/08/2026\n"
+        "Líquido a Receber: R$ 2.500,50\n"
+    )
+    item = _extrair_holerite_pdf(texto)
+
+    assert item is not None
+    assert float(item.valor) == 2500.50
+    assert item.data == dt.date(2026, 8, 31)
+
+
+def test_extrai_holerite_com_rotulo_salario_liquido_e_competencia():
+    texto = (
+        "Contracheque\n"
+        "Competência: 09/2026\n"
+        "Salário Líquido 3.200,00\n"
+    )
+    item = _extrair_holerite_pdf(texto)
+
+    assert item is not None
+    assert float(item.valor) == 3200.00
+    assert item.data == dt.date(2026, 9, 30)
+
+
+def test_nao_confunde_documento_qualquer_com_holerite():
+    # tem um valor parecido mas não é um holerite - não deve confundir
+    texto = "Comprovante de transferência\nValor líquido enviado: R$ 100,00\n"
+    item = _extrair_holerite_pdf(texto)
+    assert item is None
+
+
+def test_holerite_sem_data_reconhecivel_retorna_none():
+    texto = "Demonstrativo de Pagamento de Salário\nValor Líquido 1.000,00\n"
+    item = _extrair_holerite_pdf(texto)
+    assert item is None
