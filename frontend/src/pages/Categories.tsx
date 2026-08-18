@@ -150,56 +150,53 @@ export default function Categories() {
   const totalHidden = items.filter((c) => !c.is_active).length;
 
   return (
-    <div style={{ padding: 24 }}>
-      <h2 style={{ margin: 0 }}>Categorias</h2>
-      <p style={{ marginTop: 6, opacity: 0.7 }}>
-        Criar, editar e <strong>ocultar</strong> categorias (sem apagar).
-      </p>
+    <div>
+      <div className="page-header">
+        <h2 className="page-title">Categorias</h2>
+        <p className="page-subtitle">Criar, editar e ocultar categorias (sem apagar).</p>
+      </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10 }}>
-        <label style={{ display: "flex", alignItems: "center", gap: 8, userSelect: "none" }}>
-          <input
-            type="checkbox"
-            checked={showHidden}
-            onChange={(e) => setShowHidden(e.target.checked)}
-          />
-          Mostrar ocultas {totalHidden > 0 ? `(ocultas: ${totalHidden})` : ""}
-        </label>
+      <div className="toolbar">
+        <div className="toolbar-left">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={showHidden}
+              onChange={(e) => setShowHidden(e.target.checked)}
+            />
+            Mostrar ocultas {totalHidden > 0 ? `(ocultas: ${totalHidden})` : ""}
+          </label>
+        </div>
 
-        <button onClick={load} disabled={loading} style={{ padding: "8px 12px" }}>
+        <button className="btn btn-ghost" onClick={load} disabled={loading}>
           {loading ? "Atualizando..." : "Recarregar"}
         </button>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 14 }}>
+      <div className="add-row">
         <input
           placeholder="Nova categoria (ex: Mercado)"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          style={{ padding: 10, width: 320 }}
           onKeyDown={(e) => {
             if (e.key === "Enter") createCategory();
           }}
         />
-        <button onClick={createCategory} disabled={busyId === -1 || loading} style={{ padding: "10px 14px" }}>
+        <button className="btn btn-primary" onClick={createCategory} disabled={busyId === -1 || loading}>
           {busyId === -1 ? "Criando..." : "Adicionar"}
         </button>
       </div>
 
-      {error && (
-        <div style={{ marginTop: 14, padding: 10, border: "1px solid #ffb3b3", background: "#ffe6e6" }}>
-          <strong>Erro:</strong> {error}
-        </div>
-      )}
+      {error && <div className="alert alert-error">{error}</div>}
 
-      <div style={{ marginTop: 18, border: "1px solid #eee", borderRadius: 8, overflow: "hidden" }}>
-        <div style={{ padding: 12, background: "#fafafa", borderBottom: "1px solid #eee" }}>
+      <div className="card">
+        <div className="card-header">
           <strong>Total exibido:</strong> {totalVisible}
-          <span style={{ opacity: 0.7 }}> (no banco: {totalAll})</span>
+          <span> · no banco: {totalAll}</span>
         </div>
 
         {sorted.length === 0 && (
-          <div style={{ padding: 12, opacity: 0.7 }}>
+          <div className="empty-state">
             {showHidden
               ? "Nenhuma categoria cadastrada ainda."
               : "Nenhuma categoria ativa. Marque “Mostrar ocultas” para ver as ocultas."}
@@ -211,65 +208,53 @@ export default function Categories() {
           const isBusy = busyId === cat.id;
 
           return (
-            <div
-              key={cat.id}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                padding: 12,
-                borderBottom: "1px solid #eee",
-                opacity: cat.is_active ? 1 : 0.6,
-              }}
-            >
-              <div style={{ width: 60, opacity: 0.6 }}>#{cat.id}</div>
+            <div key={cat.id} className={`category-row${cat.is_active ? "" : " is-hidden"}`}>
+              <div className="category-id">#{cat.id}</div>
 
               {!isEditing ? (
-                <div style={{ flex: 1 }}>
-                  {cat.name}{" "}
-                  {!cat.is_active && (
-                    <span style={{ marginLeft: 8, fontSize: 12, opacity: 0.8 }}>
-                      (oculta)
-                    </span>
-                  )}
+                <div className="category-name">
+                  {cat.name}
+                  {!cat.is_active && <span className="badge-hidden">oculta</span>}
                 </div>
               ) : (
-                <input
-                  value={editingName}
-                  onChange={(e) => setEditingName(e.target.value)}
-                  style={{ padding: 8, flex: 1 }}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") saveEdit(cat.id);
-                    if (e.key === "Escape") cancelEdit();
-                  }}
-                />
+                <div className="category-name">
+                  <input
+                    value={editingName}
+                    onChange={(e) => setEditingName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") saveEdit(cat.id);
+                      if (e.key === "Escape") cancelEdit();
+                    }}
+                    autoFocus
+                  />
+                </div>
               )}
 
               {!isEditing ? (
-                <>
-                  <button onClick={() => startEdit(cat)} disabled={isBusy} style={{ padding: "8px 10px" }}>
+                <div className="row-actions">
+                  <button className="btn btn-ghost" onClick={() => startEdit(cat)} disabled={isBusy}>
                     Editar
                   </button>
 
                   {cat.is_active ? (
-                    <button onClick={() => hideCategory(cat.id)} disabled={isBusy} style={{ padding: "8px 10px" }}>
+                    <button className="btn btn-danger" onClick={() => hideCategory(cat.id)} disabled={isBusy}>
                       {isBusy ? "Ocultando..." : "Ocultar"}
                     </button>
                   ) : (
-                    <button onClick={() => showCategory(cat.id)} disabled={isBusy} style={{ padding: "8px 10px" }}>
+                    <button className="btn btn-primary" onClick={() => showCategory(cat.id)} disabled={isBusy}>
                       {isBusy ? "Reativando..." : "Reativar"}
                     </button>
                   )}
-                </>
+                </div>
               ) : (
-                <>
-                  <button onClick={() => saveEdit(cat.id)} disabled={isBusy} style={{ padding: "8px 10px" }}>
+                <div className="row-actions">
+                  <button className="btn btn-primary" onClick={() => saveEdit(cat.id)} disabled={isBusy}>
                     {isBusy ? "Salvando..." : "Salvar"}
                   </button>
-                  <button onClick={cancelEdit} disabled={isBusy} style={{ padding: "8px 10px" }}>
+                  <button className="btn btn-ghost" onClick={cancelEdit} disabled={isBusy}>
                     Cancelar
                   </button>
-                </>
+                </div>
               )}
             </div>
           );

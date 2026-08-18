@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Categories from "./pages/Categories";
 import { isLoggedIn, logout, me } from "./lib/auth";
 import type { UserOut } from "./lib/auth";
+import "./App.css";
 
 type AppState =
   | { status: "loading" }
@@ -37,7 +38,9 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (state.status === "loading") return <div style={{ padding: 40 }}>Carregando...</div>;
+  if (state.status === "loading") {
+    return <div className="center-screen">Carregando...</div>;
+  }
 
   if (state.status === "loggedOut") {
     return <Login onLoggedIn={(user) => setState({ status: "loggedIn", user })} />;
@@ -45,40 +48,43 @@ export default function App() {
 
   if (state.status === "error") {
     return (
-      <div style={{ padding: 40 }}>
-        <h2>Erro</h2>
-        <p>{state.message}</p>
-        <button onClick={loadSession}>Tentar novamente</button>
-        <div style={{ marginTop: 12 }}>
-          <button onClick={() => logout()}>Voltar para login</button>
+      <div className="login-screen">
+        <div className="login-card">
+          <div className="login-header">
+            <div className="login-title">Algo deu errado</div>
+            <p className="login-subtitle">{state.message}</p>
+          </div>
+          <button className="btn btn-primary btn-block" onClick={loadSession}>
+            Tentar novamente
+          </button>
+          <div style={{ marginTop: 10 }}>
+            <button className="btn btn-ghost btn-block" onClick={() => logout()}>
+              Voltar para login
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif" }}>
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 24px",
-          borderBottom: "1px solid #eee",
-        }}
-      >
-        <div>
-          <strong>Finance Pro</strong>{" "}
-          <span style={{ opacity: 0.7 }}>
-            — {state.user.email} ({state.user.role})
-          </span>
+    <div className="app-shell">
+      <header className="app-header">
+        <div className="brand">
+          <span className="brand-mark">F</span>
+          <span className="brand-name">Finance Pro</span>
         </div>
-        <button onClick={() => logout()} style={{ padding: "8px 12px" }}>
-          Logout
-        </button>
+
+        <div className="session-info">
+          <span className="session-user">{state.user.email}</span>
+          <span className="role-badge">{state.user.role}</span>
+          <button className="btn btn-ghost" onClick={() => logout()}>
+            Logout
+          </button>
+        </div>
       </header>
 
-      <main>
+      <main className="app-main">
         <Categories />
       </main>
     </div>
