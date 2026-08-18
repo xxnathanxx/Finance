@@ -16,16 +16,20 @@ type ResumoMensal = {
   expenses_by_category: ResumoCategoria[];
 };
 
+type Configuracoes = {
+  monthly_goal: number | null;
+};
+
 const CORES_CATEGORIA = [
-  "#2a78d6", // azul
-  "#eb6834", // laranja
-  "#1baf7a", // água-marinha
-  "#eda100", // amarelo
-  "#e87ba4", // magenta
-  "#008300", // verde
-  "#4a3aa7", // violeta
+  "#3987e5", // azul
+  "#d95926", // laranja
+  "#199e70", // água-marinha
+  "#c98500", // amarelo
+  "#d55181", // magenta
+  "#22d97a", // verde
+  "#9085e9", // violeta
 ];
-const COR_OUTRAS = "#898781";
+const COR_OUTRAS = "#6b7280";
 const MAX_CATEGORIAS_EXIBIDAS = 7;
 
 type TipoGrafico = "pizza" | "barras";
@@ -36,6 +40,11 @@ export default function Relatorio() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>("pizza");
+
+  const [meta, setMeta] = useState<number | null>(null);
+  const [editandoMeta, setEditandoMeta] = useState(false);
+  const [valorMetaInput, setValorMetaInput] = useState("");
+  const [salvandoMeta, setSalvandoMeta] = useState(false);
 
   async function carregar() {
     const [ano, mes] = mesSelecionado.split("-").map(Number);
@@ -54,10 +63,45 @@ export default function Relatorio() {
     }
   }
 
+  async function carregarMeta() {
+    try {
+      const res = await api.get<Configuracoes>("/settings");
+      setMeta(res.data.monthly_goal);
+    } catch {
+      // meta é um extra - se falhar em carregar, só não mostra nada
+    }
+  }
+
   useEffect(() => {
     carregar();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mesSelecionado]);
+
+  useEffect(() => {
+    carregarMeta();
+  }, []);
+
+  function iniciarEdicaoMeta() {
+    setValorMetaInput(meta !== null ? String(meta) : "");
+    setEditandoMeta(true);
+  }
+
+  async function salvarMeta(e: React.FormEvent) {
+    e.preventDefault();
+    if (!valorMetaInput) return;
+
+    setSalvandoMeta(true);
+    try {
+      const res = await api.put<Configuracoes>("/settings", { monthly_goal: Number(valorMetaInput) });
+      setMeta(res.data.monthly_goal);
+      setEditandoMeta(false);
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.message || "Falha ao salvar meta";
+      setError(msg);
+    } finally {
+      setSalvandoMeta(false);
+    }
+  }
 
   const categorias = useMemo(() => {
     if (!resumo) return [];
@@ -103,6 +147,10 @@ export default function Relatorio() {
     return `conic-gradient(${trechos.join(", ")})`;
   }, [categorias]);
 
+  const metaAtingida = resumo && meta !== null && resumo.balance >= meta;
+  const progressoMeta =
+    resumo && meta ? Math.min(100, Math.max(0, (resumo.balance / meta) * 100)) : 0;
+
   return (
     <div>
       <div className="cabecalho-pagina">
@@ -146,6 +194,80 @@ export default function Relatorio() {
               <div className="cartao-resumo-rotulo">Saldo</div>
               <div className="cartao-resumo-valor">{formatarMoeda(resumo.balance)}</div>
             </div>
+          </div>
+
+          <div className="cartao cartao-meta">
+            <div className="cartao-meta-cabecalho">
+              <span className="cartao-meta-titulo">Meta do mês</span>
+
+              {meta !== null && !editandoMeta && (
+                <span
+                  className={`cartao-meta-status ${
+                    metaAtingida ? "cartao-meta-status-atingida" : "cartao-meta-status-em-andamento"
+                  }`}
+                >
+                  {metaAtingida ? "Meta atingida! 🎉" : "Em andamento"}
+                </span>
+              )}
+              {meta === null && !editandoMeta && (
+                <span className="cartao-meta-status cartao-meta-status-sem-meta">Sem meta definida</span>
+              )}
+            </div>
+
+            {editandoMeta ? (
+              <form className="form-editar-meta" onSubmit={salvarMeta}>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Ex: 500"
+                  value={valorMetaInput}
+                  onChange={(e) => setValorMetaInput(e.target.value)}
+                  autoFocus
+                />
+                <button type="submit" className="botao botao-primario" disabled={salvandoMeta}>
+                  {salvandoMeta ? "Salvando..." : "Salvar"}
+                </button>
+                <button
+                  type="button"
+                  className="botao botao-secundario"
+                  onClick={() => setEditandoMeta(false)}
+                  disabled={salvandoMeta}
+                >
+                  Cancelar
+                </button>
+              </form>
+            ) : (
+              <>
+                {meta !== null ? (
+                  <>
+                    <div className="trilha-meta">
+                      <div
+                        className={`preenchimento-meta ${metaAtingida ? "preenchimento-meta-atingida" : ""}`}
+                        style={{ width: `${progressoMeta}%` }}
+                      />
+                    </div>
+                    <p className="cartao-meta-texto">
+                      {formatarMoeda(resumo.balance)} de {formatarMoeda(meta)}
+                      {!metaAtingida && meta - resumo.balance > 0 && (
+                        <> · faltam {formatarMoeda(meta - resumo.balance)}</>
+                      )}
+                      {" · "}
+                      <button type="button" className="link-botao" onClick={iniciarEdicaoMeta}>
+                        Editar meta
+                      </button>
+                    </p>
+                  </>
+                ) : (
+                  <p className="cartao-meta-texto">
+                    Defina uma meta de saldo positivo pra acompanhar seu progresso todo mês.{" "}
+                    <button type="button" className="link-botao" onClick={iniciarEdicaoMeta}>
+                      Definir meta
+                    </button>
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <div className="cartao">
