@@ -39,7 +39,7 @@ export default function App() {
   }, []);
 
   if (state.status === "loading") {
-    return <div className="center-screen">Carregando...</div>;
+    return <div className="tela-central">Carregando...</div>;
   }
 
   if (state.status === "loggedOut") {
@@ -48,17 +48,17 @@ export default function App() {
 
   if (state.status === "error") {
     return (
-      <div className="login-screen">
-        <div className="login-card">
-          <div className="login-header">
-            <div className="login-title">Algo deu errado</div>
-            <p className="login-subtitle">{state.message}</p>
+      <div className="tela-login">
+        <div className="cartao-login">
+          <div className="cabecalho-login">
+            <div className="titulo-login">Algo deu errado</div>
+            <p className="subtitulo-login">{state.message}</p>
           </div>
-          <button className="btn btn-primary btn-block" onClick={loadSession}>
+          <button className="botao botao-primario botao-bloco" onClick={loadSession}>
             Tentar novamente
           </button>
           <div style={{ marginTop: 10 }}>
-            <button className="btn btn-ghost btn-block" onClick={() => logout()}>
+            <button className="botao botao-secundario botao-bloco" onClick={() => logout()}>
               Voltar para login
             </button>
           </div>
@@ -68,23 +68,23 @@ export default function App() {
   }
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <div className="brand">
-          <span className="brand-mark">F</span>
-          <span className="brand-name">Finance Pro</span>
+    <div className="estrutura-app">
+      <header className="cabecalho-app">
+        <div className="marca">
+          <span className="selo-marca">F</span>
+          <span className="nome-marca">Finance Pro</span>
         </div>
 
-        <div className="session-info">
-          <span className="session-user">{state.user.email}</span>
-          <span className="role-badge">{state.user.role}</span>
-          <button className="btn btn-ghost" onClick={() => logout()}>
-            Logout
+        <div className="info-sessao">
+          <span className="usuario-sessao">{state.user.email}</span>
+          <span className="selo-cargo">{state.user.role}</span>
+          <button className="botao botao-secundario" onClick={() => logout()}>
+            Sair
           </button>
         </div>
       </header>
 
-      <main className="app-main">
+      <main className="conteudo-app">
         <Categories />
       </main>
     </div>

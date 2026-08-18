@@ -151,14 +151,14 @@ export default function Categories() {
 
   return (
     <div>
-      <div className="page-header">
-        <h2 className="page-title">Categorias</h2>
-        <p className="page-subtitle">Criar, editar e ocultar categorias (sem apagar).</p>
+      <div className="cabecalho-pagina">
+        <h2 className="titulo-pagina">Categorias</h2>
+        <p className="subtitulo-pagina">Criar, editar e ocultar categorias (sem apagar).</p>
       </div>
 
-      <div className="toolbar">
-        <div className="toolbar-left">
-          <label className="checkbox-label">
+      <div className="barra-ferramentas">
+        <div className="barra-ferramentas-esquerda">
+          <label className="rotulo-checkbox">
             <input
               type="checkbox"
               checked={showHidden}
@@ -168,12 +168,12 @@ export default function Categories() {
           </label>
         </div>
 
-        <button className="btn btn-ghost" onClick={load} disabled={loading}>
+        <button className="botao botao-secundario" onClick={load} disabled={loading}>
           {loading ? "Atualizando..." : "Recarregar"}
         </button>
       </div>
 
-      <div className="add-row">
+      <div className="linha-adicionar">
         <input
           placeholder="Nova categoria (ex: Mercado)"
           value={newName}
@@ -182,21 +182,21 @@ export default function Categories() {
             if (e.key === "Enter") createCategory();
           }}
         />
-        <button className="btn btn-primary" onClick={createCategory} disabled={busyId === -1 || loading}>
+        <button className="botao botao-primario" onClick={createCategory} disabled={busyId === -1 || loading}>
           {busyId === -1 ? "Criando..." : "Adicionar"}
         </button>
       </div>
 
-      {error && <div className="alert alert-error">{error}</div>}
+      {error && <div className="aviso aviso-erro">{error}</div>}
 
-      <div className="card">
-        <div className="card-header">
+      <div className="cartao">
+        <div className="cabecalho-cartao">
           <strong>Total exibido:</strong> {totalVisible}
           <span> · no banco: {totalAll}</span>
         </div>
 
         {sorted.length === 0 && (
-          <div className="empty-state">
+          <div className="estado-vazio">
             {showHidden
               ? "Nenhuma categoria cadastrada ainda."
               : "Nenhuma categoria ativa. Marque “Mostrar ocultas” para ver as ocultas."}
@@ -208,16 +208,16 @@ export default function Categories() {
           const isBusy = busyId === cat.id;
 
           return (
-            <div key={cat.id} className={`category-row${cat.is_active ? "" : " is-hidden"}`}>
-              <div className="category-id">#{cat.id}</div>
+            <div key={cat.id} className={`linha-categoria${cat.is_active ? "" : " esta-oculta"}`}>
+              <div className="id-categoria">#{cat.id}</div>
 
               {!isEditing ? (
-                <div className="category-name">
+                <div className="nome-categoria">
                   {cat.name}
-                  {!cat.is_active && <span className="badge-hidden">oculta</span>}
+                  {!cat.is_active && <span className="selo-oculta">oculta</span>}
                 </div>
               ) : (
-                <div className="category-name">
+                <div className="nome-categoria">
                   <input
                     value={editingName}
                     onChange={(e) => setEditingName(e.target.value)}
@@ -231,27 +231,27 @@ export default function Categories() {
               )}
 
               {!isEditing ? (
-                <div className="row-actions">
-                  <button className="btn btn-ghost" onClick={() => startEdit(cat)} disabled={isBusy}>
+                <div className="acoes-linha">
+                  <button className="botao botao-secundario" onClick={() => startEdit(cat)} disabled={isBusy}>
                     Editar
                   </button>
 
                   {cat.is_active ? (
-                    <button className="btn btn-danger" onClick={() => hideCategory(cat.id)} disabled={isBusy}>
+                    <button className="botao botao-perigo" onClick={() => hideCategory(cat.id)} disabled={isBusy}>
                       {isBusy ? "Ocultando..." : "Ocultar"}
                     </button>
                   ) : (
-                    <button className="btn btn-primary" onClick={() => showCategory(cat.id)} disabled={isBusy}>
+                    <button className="botao botao-primario" onClick={() => showCategory(cat.id)} disabled={isBusy}>
                       {isBusy ? "Reativando..." : "Reativar"}
                     </button>
                   )}
                 </div>
               ) : (
-                <div className="row-actions">
-                  <button className="btn btn-primary" onClick={() => saveEdit(cat.id)} disabled={isBusy}>
+                <div className="acoes-linha">
+                  <button className="botao botao-primario" onClick={() => saveEdit(cat.id)} disabled={isBusy}>
                     {isBusy ? "Salvando..." : "Salvar"}
                   </button>
-                  <button className="btn btn-ghost" onClick={cancelEdit} disabled={isBusy}>
+                  <button className="botao botao-secundario" onClick={cancelEdit} disabled={isBusy}>
                     Cancelar
                   </button>
                 </div>
