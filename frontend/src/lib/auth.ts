@@ -35,6 +35,16 @@ export async function login(username: string, password: string): Promise<TokenPa
   return res.data;
 }
 
+// CADASTRO: cria a conta (não loga sozinho, precisa chamar login() depois)
+export async function registrar(email: string, password: string, name: string): Promise<UserOut> {
+  const res = await axios.post<UserOut>(
+    `${API_BASE_URL}/auth/register`,
+    { email, password, name: name || undefined },
+    { headers: { "Content-Type": "application/json" } }
+  );
+  return res.data;
+}
+
 // ME: usa api (vai com Authorization automaticamente)
 export async function me(): Promise<UserOut> {
   const res = await api.get<UserOut>("/auth/me");
