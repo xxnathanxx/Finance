@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.auth.router import router as auth_router
 from app.auth.seed_admin import ensure_admin
 from app.database import Base, SessionLocal, engine
+from app.routes.account import router as account_router
 from app.routes.categories import router as categories_router
 from app.routes.importacao import router as import_router
 from app.routes.reports import router as reports_router
@@ -45,6 +46,7 @@ app.include_router(transactions_router)
 app.include_router(reports_router)
 app.include_router(settings_router)
 app.include_router(import_router)
+app.include_router(account_router)
 
 
 @app.get("/health", tags=["Health"])

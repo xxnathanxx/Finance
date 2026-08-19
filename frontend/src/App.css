@@ -247,6 +247,66 @@
   border: 1px solid rgba(255, 92, 122, 0.3);
 }
 
+.aviso-sucesso {
+  background: var(--color-success-soft);
+  color: var(--color-success);
+  border: 1px solid rgba(34, 217, 122, 0.3);
+}
+
+/* ---------- Configurações / zona de perigo ---------- */
+
+.cartao-zona-perigo {
+  border-color: rgba(255, 92, 122, 0.35);
+}
+
+.zona-perigo-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.zona-perigo-item:last-child {
+  border-bottom: none;
+}
+
+.zona-perigo-item p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  max-width: 480px;
+}
+
+.modal-confirmacao {
+  width: 100%;
+  max-width: 460px;
+  background: var(--color-surface-solid, #10162a);
+  border: 1px solid rgba(255, 92, 122, 0.35);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: 26px 28px;
+  animation: surgir-modal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-confirmacao h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-danger);
+  margin-bottom: 10px;
+}
+
+.modal-confirmacao p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 14px;
+}
+
+.modal-confirmacao .campo-formulario {
+  margin-bottom: 18px;
+}
+
 /* ---------- Página de Categorias ---------- */
 
 .cabecalho-pagina {
