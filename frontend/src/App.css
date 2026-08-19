@@ -577,7 +577,7 @@
 
 .aba-botao svg {
   opacity: 0.75;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.15s ease, filter 0.15s ease;
 }
 
 .aba-botao:hover:not(:disabled) {
@@ -586,21 +586,29 @@
   box-shadow: none;
 }
 
+.aba-botao:hover:not(:disabled) svg {
+  filter: drop-shadow(0 0 4px rgba(124, 92, 255, 0.4));
+}
+
 .aba-botao.aba-ativa {
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  text-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  text-shadow: 0 0 18px rgba(124, 92, 255, 0.4);
 }
 
 .aba-botao.aba-ativa svg {
   opacity: 1;
-  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.5));
+  filter: drop-shadow(0 0 6px rgba(124, 92, 255, 0.6));
 }
 
 .botao-com-icone {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+}
+
+.botao-com-icone:hover:not(:disabled):not(.botao-perigo) svg {
+  filter: drop-shadow(0 0 4px rgba(124, 92, 255, 0.5));
 }
 
 /* ---------- Relatório ---------- */
