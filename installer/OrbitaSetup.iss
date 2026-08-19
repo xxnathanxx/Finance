@@ -40,15 +40,20 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
 
 [Code]
+// GUID fixo igual ao AppId acima - NÃO usar {#SetupSetting("AppId")} aqui: a
+// macro do ISPP devolve o texto cru do .iss ("{{B41C..." com chave dobrada
+// de escape), não o valor de fato usado no registro ("{B41C..."), e isso
+// fazia a detecção abaixo nunca bater com a instalação existente.
+const
+  AppUninstallKeyPath = 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{B41C0454-BA76-4C10-878A-516F9DB2633A}_is1';
+
 function GetUninstallString(): String;
 var
-  sUnInstPath: String;
   sUnInstallString: String;
 begin
-  sUnInstPath := 'Software\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}_is1';
   sUnInstallString := '';
-  if not RegQueryStringValue(HKCU, sUnInstPath, 'UninstallString', sUnInstallString) then
-    RegQueryStringValue(HKLM, sUnInstPath, 'UninstallString', sUnInstallString);
+  if not RegQueryStringValue(HKCU, AppUninstallKeyPath, 'UninstallString', sUnInstallString) then
+    RegQueryStringValue(HKLM, AppUninstallKeyPath, 'UninstallString', sUnInstallString);
   Result := sUnInstallString;
 end;
 
