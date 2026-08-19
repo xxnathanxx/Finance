@@ -62,7 +62,7 @@ const COR_OUTRAS = "#6b7280";
 const MAX_CATEGORIAS_EXIBIDAS = 7;
 
 type TipoGrafico = "pizza" | "barras";
-type TipoPeriodo = "semanal" | "mensal" | "anual";
+type TipoPeriodo = "semanal" | "mensal" | "anual" | "tudo";
 type VisaoCategoria = "despesas" | "receitas";
 
 function dataParaSemanaISO(data: Date): string {
@@ -134,13 +134,18 @@ export default function Relatorio() {
         ultimoDia.setUTCDate(ultimoDia.getUTCDate() - 1);
         const rotulo = `${formatarDataBr(inicio)} a ${formatarDataBr(ultimoDia.toISOString().slice(0, 10))}`;
         setResumo({ rotulo, ...res.data });
-      } else {
+      } else if (tipoPeriodo === "anual") {
         const inicio = `${anoSelecionado}-01-01`;
         const fimExclusivo = `${anoSelecionado + 1}-01-01`;
         const res = await api.get<ResumoPeriodo>("/reports/period", {
           params: { start: inicio, end: fimExclusivo },
         });
         setResumo({ rotulo: String(anoSelecionado), ...res.data });
+      } else {
+        const res = await api.get<ResumoPeriodo>("/reports/period", {
+          params: { start: "2000-01-01", end: "2100-01-01" },
+        });
+        setResumo({ rotulo: "todo o período", ...res.data });
       }
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || "Falha ao carregar relatório";
@@ -271,6 +276,13 @@ export default function Relatorio() {
               onClick={() => setTipoPeriodo("anual")}
             >
               Anual
+            </button>
+            <button
+              type="button"
+              className={`botao-alternador${tipoPeriodo === "tudo" ? " botao-alternador-ativo" : ""}`}
+              onClick={() => setTipoPeriodo("tudo")}
+            >
+              Todas
             </button>
           </div>
 
