@@ -1,4 +1,5 @@
 import { formatarData, formatarMoeda } from "../lib/formatacao";
+import { IconeEditar, IconeExcluir } from "./Icones";
 
 type Categoria = {
   id: number;
@@ -118,11 +119,11 @@ export default function LinhaTransacao({
         {formatarMoeda(t.amount)}
       </span>
       <div className="acoes-linha">
-        <button className="botao botao-secundario" onClick={onIniciarEdicao} disabled={ocupado}>
-          Editar
+        <button className="botao botao-secundario botao-com-icone" onClick={onIniciarEdicao} disabled={ocupado}>
+          <IconeEditar /> Editar
         </button>
-        <button className="botao botao-perigo" onClick={onExcluir} disabled={ocupado}>
-          {ocupado ? "Excluindo..." : "Excluir"}
+        <button className="botao botao-perigo botao-com-icone" onClick={onExcluir} disabled={ocupado}>
+          <IconeExcluir /> {ocupado ? "Excluindo..." : "Excluir"}
         </button>
       </div>
     </div>

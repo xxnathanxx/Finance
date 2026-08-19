@@ -180,7 +180,11 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
               </label>
             )}
 
-            {erro && <div className="aviso aviso-erro">{erro}</div>}
+            {erro && (
+              <div className="aviso aviso-erro" role="alert">
+                {erro}
+              </div>
+            )}
 
             <button className="botao botao-primario" onClick={analisar} disabled={!arquivo || analisando}>
               {analisando ? "Analisando..." : "Analisar arquivo"}
@@ -191,14 +195,18 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
         {itens && (
           <>
             {avisos.length > 0 && (
-              <div className="aviso aviso-erro">
+              <div className="aviso aviso-erro" role="alert">
                 {avisos.map((a, i) => (
                   <div key={i}>{a}</div>
                 ))}
               </div>
             )}
 
-            {erro && <div className="aviso aviso-erro">{erro}</div>}
+            {erro && (
+              <div className="aviso aviso-erro" role="alert">
+                {erro}
+              </div>
+            )}
 
             {itens.length === 0 ? (
               <div className="estado-vazio">

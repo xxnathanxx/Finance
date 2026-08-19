@@ -182,7 +182,11 @@ export default function Categories() {
         </button>
       </div>
 
-      {error && <div className="aviso aviso-erro">{error}</div>}
+      {error && (
+        <div className="aviso aviso-erro" role="alert">
+          {error}
+        </div>
+      )}
 
       <div className="cartao">
         <div className="cabecalho-cartao">

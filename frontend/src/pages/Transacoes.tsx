@@ -344,7 +344,11 @@ export default function Transacoes() {
         onSubmit={criarTransacao}
       />
 
-      {error && <div className="aviso aviso-erro">{error}</div>}
+      {error && (
+        <div className="aviso aviso-erro" role="alert">
+          {error}
+        </div>
+      )}
 
       <CartoesResumo
         receita={receitaFiltrada}

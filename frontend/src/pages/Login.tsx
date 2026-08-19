@@ -123,7 +123,11 @@ export default function Login({ onLoggedIn }: Props) {
             Lembrar usuário e senha
           </label>
 
-          {error && <div className="aviso aviso-erro">{error}</div>}
+          {error && (
+            <div className="aviso aviso-erro" role="alert">
+              {error}
+            </div>
+          )}
 
           <button type="submit" className="botao botao-primario botao-bloco" disabled={loading}>
             {loading
