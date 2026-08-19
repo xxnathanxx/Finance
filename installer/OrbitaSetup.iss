@@ -75,23 +75,31 @@ begin
   end;
 end;
 
-function InitializeSetup(): Boolean;
 var
-  Escolha: Integer;
+  PaginaEscolhaInstalacao: TInputOptionWizardPage;
+
+procedure InitializeWizard();
+begin
+  PaginaEscolhaInstalacao := CreateInputOptionPage(wpWelcome,
+    'Instalação existente encontrada',
+    'O Órbita já está instalado nesse computador. O que você quer fazer?',
+    '',
+    True, False);
+  PaginaEscolhaInstalacao.Add('Atualizar (substitui o programa pela versão nova, mantém seus dados)');
+  PaginaEscolhaInstalacao.Add('Remover tudo e instalar do zero (seus dados NÃO são apagados, ficam em %LOCALAPPDATA%\Orbita)');
+  PaginaEscolhaInstalacao.SelectedValueIndex := 0;
+end;
+
+function ShouldSkipPage(PageID: Integer): Boolean;
+begin
+  Result := False;
+  if PageID = PaginaEscolhaInstalacao.ID then
+    Result := not IsJaInstalado();
+end;
+
+function NextButtonClick(CurPageID: Integer): Boolean;
 begin
   Result := True;
-  if IsJaInstalado() then
-  begin
-    Escolha := MsgBox(
-      'O Órbita já está instalado nesse computador.' + #13#10 + #13#10 +
-      'Clique em "Sim" para remover a versão instalada antes de continuar (seus dados NÃO são apagados, ficam em %LOCALAPPDATA%\Orbita).' + #13#10 +
-      'Clique em "Não" para reinstalar por cima da versão atual.' + #13#10 + #13#10 +
-      'Cancelar fecha o instalador sem fazer nada.',
-      mbConfirmation, MB_YESNOCANCEL
-    );
-    if Escolha = IDYES then
-      DesinstalarVersaoAnterior()
-    else if Escolha = IDCANCEL then
-      Result := False;
-  end;
+  if (CurPageID = PaginaEscolhaInstalacao.ID) and (PaginaEscolhaInstalacao.SelectedValueIndex = 1) then
+    DesinstalarVersaoAnterior();
 end;
