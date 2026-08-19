@@ -110,9 +110,27 @@
 .tela-central {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 16px;
   color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.spinner-carregando {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--color-accent);
+  animation: girar-spinner 0.8s linear infinite;
+}
+
+@keyframes girar-spinner {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ---------- Login ---------- */
@@ -432,7 +450,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--color-border);
   transition: background-color 0.15s ease;
 }
@@ -619,10 +637,22 @@
   color: var(--color-text);
 }
 
-.rotulo-barra-valor {
-  color: var(--color-text-muted);
-  font-variant-numeric: tabular-nums;
+.rotulo-barra-numeros {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   white-space: nowrap;
+}
+
+.rotulo-barra-valor {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.rotulo-barra-percentual {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .trilha-barra {
@@ -635,7 +665,11 @@
 .preenchimento-barra {
   height: 100%;
   border-radius: 999px;
-  transition: width 0.25s ease;
+  transition: width 0.25s ease, filter 0.15s ease;
+}
+
+.linha-barra:hover .preenchimento-barra {
+  filter: brightness(1.18);
 }
 
 /* ---------- Alternador de gráfico ---------- */
@@ -745,7 +779,14 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
   font-size: 0.88rem;
+  transition: background-color 0.15s ease;
+}
+
+.legenda-item:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .legenda-cor {
@@ -758,12 +799,27 @@
 .legenda-nome {
   flex: 1;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legenda-numeros {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
 }
 
 .legenda-valor {
-  color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
-  white-space: nowrap;
+  font-weight: 600;
+}
+
+.legenda-percentual {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Meta mensal ---------- */
@@ -876,7 +932,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 12px 18px;
   border-bottom: 1px solid var(--color-border);
   transition: background-color 0.15s ease;
 }

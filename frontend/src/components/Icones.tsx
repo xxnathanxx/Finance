@@ -71,6 +71,24 @@ export function IconeAlerta({ tamanho = 18, className }: IconeProps) {
   );
 }
 
+export function IconeEditar({ tamanho = 15, className }: IconeProps) {
+  return (
+    <svg width={tamanho} height={tamanho} className={className} {...basePropsSvg}>
+      <path d="M14.5 3.5a2.12 2.12 0 0 1 3 3L7 17l-4 1 1-4 10.5-10.5Z" />
+    </svg>
+  );
+}
+
+export function IconeExcluir({ tamanho = 15, className }: IconeProps) {
+  return (
+    <svg width={tamanho} height={tamanho} className={className} {...basePropsSvg}>
+      <path d="M4 6h16" />
+      <path d="M9 6V4.5A1.5 1.5 0 0 1 10.5 3h3A1.5 1.5 0 0 1 15 4.5V6" />
+      <path d="M6.5 6 7.3 19a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9L17.5 6" />
+    </svg>
+  );
+}
+
 export function IconeVazio({ tamanho = 32, className }: IconeProps) {
   return (
     <svg width={tamanho} height={tamanho} className={className} {...basePropsSvg}>

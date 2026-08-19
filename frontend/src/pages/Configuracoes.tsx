@@ -66,8 +66,16 @@ export default function Configuracoes() {
         <p className="subtitulo-pagina">Preferências e opções avançadas da conta.</p>
       </div>
 
-      {resultado && <div className="aviso aviso-sucesso">{resultado}</div>}
-      {erro && <div className="aviso aviso-erro">{erro}</div>}
+      {resultado && (
+        <div className="aviso aviso-sucesso" role="status">
+          {resultado}
+        </div>
+      )}
+      {erro && (
+        <div className="aviso aviso-erro" role="alert">
+          {erro}
+        </div>
+      )}
 
       <div className="cartao cartao-zona-perigo">
         <div className="cabecalho-cartao cabecalho-zona-perigo">

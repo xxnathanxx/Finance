@@ -310,7 +310,11 @@ export default function Relatorio() {
         </button>
       </div>
 
-      {error && <div className="aviso aviso-erro">{error}</div>}
+      {error && (
+        <div className="aviso aviso-erro" role="alert">
+          {error}
+        </div>
+      )}
 
       {resumo && (
         <>

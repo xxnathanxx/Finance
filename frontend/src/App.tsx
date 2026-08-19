@@ -46,7 +46,12 @@ export default function App() {
   }, []);
 
   if (state.status === "loading") {
-    return <div className="tela-central">Carregando...</div>;
+    return (
+      <div className="tela-central" role="status" aria-live="polite">
+        <span className="spinner-carregando" aria-hidden="true" />
+        <span>Carregando...</span>
+      </div>
+    );
   }
 
   if (state.status === "loggedOut") {
