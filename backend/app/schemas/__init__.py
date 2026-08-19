@@ -201,3 +201,17 @@ class SettingsOut(BaseSchema):
 
 class SettingsUpdate(BaseSchema):
     monthly_goal: float = Field(..., gt=0)
+
+
+# =========================
+# Conta - limpar dados / restaurar padrão
+# =========================
+
+class LimparDadosOut(BaseSchema):
+    transacoes_apagadas: int
+
+
+class RestaurarPadraoOut(BaseSchema):
+    transacoes_apagadas: int
+    regras_importacao_apagadas: int
+    categorias_removidas: int

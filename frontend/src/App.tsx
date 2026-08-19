@@ -3,6 +3,7 @@ import Login from "./pages/Login";
 import Categories from "./pages/Categories";
 import Relatorio from "./pages/Relatorio";
 import Transacoes from "./pages/Transacoes";
+import Configuracoes from "./pages/Configuracoes";
 import { isLoggedIn, logout, me } from "./lib/auth";
 import type { UserOut } from "./lib/auth";
 import "./App.css";
@@ -13,7 +14,7 @@ type AppState =
   | { status: "loggedIn"; user: UserOut }
   | { status: "error"; message: string };
 
-type Aba = "transacoes" | "categorias" | "relatorio";
+type Aba = "transacoes" | "categorias" | "relatorio" | "configuracoes";
 
 export default function App() {
   const [state, setState] = useState<AppState>({ status: "loading" });
@@ -108,6 +109,12 @@ export default function App() {
         >
           Categorias
         </button>
+        <button
+          className={`aba-botao${abaAtiva === "configuracoes" ? " aba-ativa" : ""}`}
+          onClick={() => setAbaAtiva("configuracoes")}
+        >
+          Configurações
+        </button>
       </nav>
 
       <main className="conteudo-app">
@@ -115,6 +122,7 @@ export default function App() {
           {abaAtiva === "transacoes" && <Transacoes />}
           {abaAtiva === "relatorio" && <Relatorio />}
           {abaAtiva === "categorias" && <Categories />}
+          {abaAtiva === "configuracoes" && <Configuracoes />}
         </div>
       </main>
     </div>
