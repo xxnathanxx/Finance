@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { useCarregar } from "../lib/useCarregar";
+import { IconeVazio } from "../components/Icones";
 
 type CategoryOut = {
   id: number;
@@ -191,6 +192,7 @@ export default function Categories() {
 
         {sorted.length === 0 && (
           <div className="estado-vazio">
+            <IconeVazio />
             {showHidden
               ? "Nenhuma categoria cadastrada ainda."
               : "Nenhuma categoria ativa. Marque “Mostrar ocultas” para ver as ocultas."}

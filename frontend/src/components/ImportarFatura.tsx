@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { api } from "../lib/api";
 import { formatarMoeda, mesAtualComoValorDeInput } from "../lib/formatacao";
+import { IconeVazio } from "./Icones";
 
 type Categoria = {
   id: number;
@@ -200,7 +201,10 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
             {erro && <div className="aviso aviso-erro">{erro}</div>}
 
             {itens.length === 0 ? (
-              <div className="estado-vazio">Nenhuma transação encontrada em {nomeArquivoAnalisado}.</div>
+              <div className="estado-vazio">
+                <IconeVazio />
+                Nenhuma transação encontrada em {nomeArquivoAnalisado}.
+              </div>
             ) : (
               <>
                 <div className="resumo-importacao">
@@ -225,6 +229,7 @@ export default function ImportarFatura({ categorias, aoFechar, aoConcluir }: Pro
 
                 {itensParaExibir.length === 0 ? (
                   <div className="estado-vazio">
+                    <IconeVazio />
                     Todas as transações desse arquivo já foram importadas antes.
                   </div>
                 ) : (

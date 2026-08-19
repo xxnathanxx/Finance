@@ -6,6 +6,7 @@ import Transacoes from "./pages/Transacoes";
 import Configuracoes from "./pages/Configuracoes";
 import { isLoggedIn, logout, me } from "./lib/auth";
 import type { UserOut } from "./lib/auth";
+import { IconeCategorias, IconeConfiguracoes, IconeRelatorio, IconeSair, IconeTransacoes } from "./components/Icones";
 import "./App.css";
 
 type AppState =
@@ -84,8 +85,8 @@ export default function App() {
         <div className="info-sessao">
           <span className="usuario-sessao">{state.user.email}</span>
           <span className="selo-cargo">{state.user.role}</span>
-          <button className="botao botao-secundario" onClick={() => logout()}>
-            Sair
+          <button className="botao botao-secundario botao-com-icone" onClick={() => logout()}>
+            <IconeSair /> Sair
           </button>
         </div>
       </header>
@@ -95,25 +96,25 @@ export default function App() {
           className={`aba-botao${abaAtiva === "transacoes" ? " aba-ativa" : ""}`}
           onClick={() => setAbaAtiva("transacoes")}
         >
-          Transações
+          <IconeTransacoes /> Transações
         </button>
         <button
           className={`aba-botao${abaAtiva === "relatorio" ? " aba-ativa" : ""}`}
           onClick={() => setAbaAtiva("relatorio")}
         >
-          Relatório
+          <IconeRelatorio /> Relatório
         </button>
         <button
           className={`aba-botao${abaAtiva === "categorias" ? " aba-ativa" : ""}`}
           onClick={() => setAbaAtiva("categorias")}
         >
-          Categorias
+          <IconeCategorias /> Categorias
         </button>
         <button
           className={`aba-botao${abaAtiva === "configuracoes" ? " aba-ativa" : ""}`}
           onClick={() => setAbaAtiva("configuracoes")}
         >
-          Configurações
+          <IconeConfiguracoes /> Configurações
         </button>
       </nav>
 
