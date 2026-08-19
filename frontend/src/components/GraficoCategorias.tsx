@@ -1,4 +1,5 @@
 import { formatarMoeda } from "../lib/formatacao";
+import { IconeVazio } from "./Icones";
 
 type CategoriaExibida = {
   nome: string;
@@ -82,6 +83,7 @@ export default function GraficoCategorias({
 
       {categorias.length === 0 ? (
         <div className="estado-vazio">
+          <IconeVazio />
           Nenhuma {visaoCategoria === "despesas" ? "despesa" : "receita"} registrada nesse período.
         </div>
       ) : tipoGrafico === "pizza" ? (

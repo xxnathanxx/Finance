@@ -6,6 +6,7 @@ import ImportarFatura from "../components/ImportarFatura";
 import CartoesResumo from "../components/CartoesResumo";
 import FormularioTransacao from "../components/FormularioTransacao";
 import LinhaTransacao from "../components/LinhaTransacao";
+import { IconeVazio } from "../components/Icones";
 
 type Categoria = {
   id: number;
@@ -360,7 +361,10 @@ export default function Transacoes() {
         </div>
 
         {transacoesFiltradas.length === 0 ? (
-          <div className="estado-vazio">Nenhuma transação nesse período.</div>
+          <div className="estado-vazio">
+            <IconeVazio />
+            Nenhuma transação nesse período.
+          </div>
         ) : (
           transacoesFiltradas.map((t) => (
             <LinhaTransacao

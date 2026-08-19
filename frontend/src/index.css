@@ -1,4 +1,45 @@
+/* Inter e Space Grotesk hospedadas localmente (só os subconjuntos latin/
+   latin-ext, que cobrem português) - o Órbita roda 100% offline, então
+   fontes de CDN externo (tipo Google Fonts) não são uma opção aqui. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("./assets/fonts/Inter-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+  src: url("./assets/fonts/Inter-Variable-Ext.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("./assets/fonts/SpaceGrotesk-Variable.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+    U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+    U+2C60-2C7F, U+A720-A7FF;
+  src: url("./assets/fonts/SpaceGrotesk-Variable-Ext.woff2") format("woff2");
+}
+
 :root {
+  --font-ui: "Inter", "Segoe UI", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --font-display: "Space Grotesk", "Inter", "Segoe UI", system-ui, sans-serif;
+
   --color-bg: #0a0e1a;
   --color-surface: rgba(255, 255, 255, 0.045);
   --color-surface-solid: #121729;
@@ -13,14 +54,18 @@
   --color-danger-soft: rgba(255, 92, 122, 0.14);
   --color-success: #22d97a;
   --color-success-soft: rgba(34, 217, 122, 0.14);
+  --color-border-forte: rgba(255, 255, 255, 0.2);
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.5);
   --glow-primary: 0 0 20px rgba(124, 92, 255, 0.45);
   --glow-primary-soft: 0 0 12px rgba(124, 92, 255, 0.25);
+  --glow-accent-soft: 0 0 16px rgba(34, 211, 238, 0.25);
   --radius-sm: 8px;
   --radius-md: 14px;
+  --radius-lg: 22px;
 
-  font-family: "Segoe UI", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-ui);
   line-height: 1.5;
   font-weight: 400;
   color-scheme: dark;
@@ -44,14 +89,16 @@ body {
   color: var(--color-text);
   background-color: var(--color-bg);
   background-image:
-    radial-gradient(circle at 15% 10%, rgba(124, 92, 255, 0.16) 0%, transparent 45%),
-    radial-gradient(circle at 85% 0%, rgba(34, 211, 238, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 50% 100%, rgba(124, 92, 255, 0.08) 0%, transparent 50%);
+    radial-gradient(circle at 12% 8%, rgba(124, 92, 255, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 88% -4%, rgba(34, 211, 238, 0.13) 0%, transparent 38%),
+    radial-gradient(circle at 50% 105%, rgba(124, 92, 255, 0.1) 0%, transparent 55%),
+    radial-gradient(circle at 100% 60%, rgba(34, 217, 122, 0.05) 0%, transparent 40%);
   background-attachment: fixed;
 }
 
 h1, h2, h3 {
   margin: 0;
+  font-family: var(--font-display);
   letter-spacing: -0.01em;
 }
 

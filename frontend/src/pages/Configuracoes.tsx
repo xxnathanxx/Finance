@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../lib/api";
 import ConfirmarAcaoPerigosa from "../components/ConfirmarAcaoPerigosa";
+import { IconeAlerta } from "../components/Icones";
 
 type ModalAberto = "transacoes" | "tudo" | null;
 
@@ -69,7 +70,9 @@ export default function Configuracoes() {
       {erro && <div className="aviso aviso-erro">{erro}</div>}
 
       <div className="cartao cartao-zona-perigo">
-        <div className="cabecalho-cartao">Zona de perigo</div>
+        <div className="cabecalho-cartao cabecalho-zona-perigo">
+          <IconeAlerta className="icone-perigo" /> Zona de perigo
+        </div>
 
         <div className="zona-perigo-item">
           <div>

@@ -61,14 +61,17 @@
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   box-shadow: var(--glow-primary-soft);
   color: white;
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: 16px;
   animation: respirar-brilho 4s ease-in-out infinite;
 }
 
 .nome-marca {
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
   background: linear-gradient(135deg, #ffffff, var(--color-accent));
   -webkit-background-clip: text;
   background-clip: text;
@@ -128,10 +131,10 @@
   background: var(--color-surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md), var(--glow-primary-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), var(--glow-primary-soft);
   border: 1px solid var(--color-border);
-  padding: 36px 32px;
+  padding: 40px 34px;
   animation: entrada-conteudo 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -140,9 +143,19 @@
   margin-bottom: 24px;
 }
 
+.selo-marca-login {
+  width: 52px;
+  height: 52px;
+  font-size: 24px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
 .titulo-login {
-  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
   font-weight: 700;
+  letter-spacing: -0.02em;
   background: linear-gradient(135deg, #ffffff, var(--color-accent));
   -webkit-background-clip: text;
   background-clip: text;
@@ -259,6 +272,17 @@
   border-color: rgba(255, 92, 122, 0.35);
 }
 
+.cabecalho-zona-perigo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-danger);
+}
+
+.icone-perigo {
+  flex-shrink: 0;
+}
+
 .zona-perigo-item {
   display: flex;
   align-items: center;
@@ -284,9 +308,9 @@
   max-width: 460px;
   background: var(--color-surface-solid, #10162a);
   border: 1px solid rgba(255, 92, 122, 0.35);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  padding: 26px 28px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 28px 30px;
   animation: surgir-modal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -314,8 +338,10 @@
 }
 
 .titulo-pagina {
-  font-size: 1.5rem;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
   font-weight: 700;
+  letter-spacing: -0.015em;
   color: var(--color-text);
 }
 
@@ -389,9 +415,17 @@
 }
 
 .estado-vazio {
-  padding: 32px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 18px;
   text-align: center;
   color: var(--color-text-muted);
+}
+
+.estado-vazio svg {
+  opacity: 0.35;
 }
 
 .linha-categoria {
@@ -462,6 +496,9 @@
 }
 
 .aba-botao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   border: none;
   border-radius: 0;
   background: transparent;
@@ -471,6 +508,11 @@
   color: var(--color-text-muted);
   border-bottom: 2px solid transparent;
   transition: color 0.15s ease, border-color 0.2s ease;
+}
+
+.aba-botao svg {
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
 }
 
 .aba-botao:hover:not(:disabled) {
@@ -483,6 +525,17 @@
   color: var(--color-accent);
   border-color: var(--color-accent);
   text-shadow: 0 0 18px rgba(34, 211, 238, 0.35);
+}
+
+.aba-botao.aba-ativa svg {
+  opacity: 1;
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.5));
+}
+
+.botao-com-icone {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ---------- Relatório ---------- */
@@ -519,8 +572,10 @@
 }
 
 .cartao-resumo-valor {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   font-variant-numeric: tabular-nums;
 }
 
@@ -673,8 +728,9 @@
 }
 
 .grafico-pizza-furo-valor {
-  font-size: 1.05rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 
@@ -726,7 +782,9 @@
 }
 
 .cartao-meta-titulo {
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--color-text);
 }
 
@@ -884,7 +942,8 @@
 .transacao-valor {
   width: 110px;
   text-align: right;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
