@@ -146,20 +146,23 @@
 }
 
 .credito-autor {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
   color: var(--color-text-muted);
-  letter-spacing: 0.02em;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
+  letter-spacing: 0.14em;
+  opacity: 0.45;
+  cursor: default;
+  transition: opacity 0.2s ease, letter-spacing 0.2s ease;
 }
 
 .credito-autor:hover {
-  opacity: 1;
+  opacity: 0.9;
+  letter-spacing: 0.18em;
 }
 
 .credito-autor-nome {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 700;
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   -webkit-background-clip: text;
   background-clip: text;
