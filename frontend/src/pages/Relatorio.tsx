@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../lib/api";
-import { formatarMoeda, mesAtualComoValorDeInput } from "../lib/formatacao";
+import { mesAtualComoValorDeInput } from "../lib/formatacao";
+import { useCarregar } from "../lib/useCarregar";
+import CartoesResumo from "../components/CartoesResumo";
+import CartaoMeta from "../components/CartaoMeta";
+import GraficoCategorias from "../components/GraficoCategorias";
 
 type ResumoCategoria = {
   category_id: number | null;
@@ -105,9 +109,6 @@ export default function Relatorio() {
   const [semanaSelecionada, setSemanaSelecionada] = useState(() => dataParaSemanaISO(new Date()));
   const [anoSelecionado, setAnoSelecionado] = useState(() => new Date().getFullYear());
 
-  const [resumo, setResumo] = useState<ResumoCarregado | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [tipoGrafico, setTipoGrafico] = useState<TipoGrafico>("pizza");
   const [visaoCategoria, setVisaoCategoria] = useState<VisaoCategoria>("despesas");
 
@@ -116,16 +117,21 @@ export default function Relatorio() {
   const [valorMetaInput, setValorMetaInput] = useState("");
   const [salvandoMeta, setSalvandoMeta] = useState(false);
 
-  async function carregar() {
-    setLoading(true);
-    setError(null);
-
-    try {
+  const {
+    dados: resumo,
+    carregando: loading,
+    erro: error,
+    setErro: setError,
+    recarregar: carregar,
+  } = useCarregar<ResumoCarregado | null>(
+    null,
+    async () => {
       if (tipoPeriodo === "mensal") {
         const [ano, mes] = mesSelecionado.split("-").map(Number);
         const res = await api.get<ResumoMensal>(`/reports/monthly/${ano}/${mes}`);
-        setResumo({ rotulo: res.data.month, ...res.data });
-      } else if (tipoPeriodo === "semanal") {
+        return { rotulo: res.data.month, ...res.data };
+      }
+      if (tipoPeriodo === "semanal") {
         const { inicio, fimExclusivo } = semanaISOParaIntervalo(semanaSelecionada);
         const res = await api.get<ResumoPeriodo>("/reports/period", {
           params: { start: inicio, end: fimExclusivo },
@@ -133,28 +139,24 @@ export default function Relatorio() {
         const ultimoDia = new Date(fimExclusivo + "T00:00:00Z");
         ultimoDia.setUTCDate(ultimoDia.getUTCDate() - 1);
         const rotulo = `${formatarDataBr(inicio)} a ${formatarDataBr(ultimoDia.toISOString().slice(0, 10))}`;
-        setResumo({ rotulo, ...res.data });
-      } else if (tipoPeriodo === "anual") {
+        return { rotulo, ...res.data };
+      }
+      if (tipoPeriodo === "anual") {
         const inicio = `${anoSelecionado}-01-01`;
         const fimExclusivo = `${anoSelecionado + 1}-01-01`;
         const res = await api.get<ResumoPeriodo>("/reports/period", {
           params: { start: inicio, end: fimExclusivo },
         });
-        setResumo({ rotulo: String(anoSelecionado), ...res.data });
-      } else {
-        const res = await api.get<ResumoPeriodo>("/reports/period", {
-          params: { start: "2000-01-01", end: "2100-01-01" },
-        });
-        setResumo({ rotulo: "todo o período", ...res.data });
+        return { rotulo: String(anoSelecionado), ...res.data };
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || "Falha ao carregar relatório";
-      setError(msg);
-      setResumo(null);
-    } finally {
-      setLoading(false);
-    }
-  }
+      const res = await api.get<ResumoPeriodo>("/reports/period", {
+        params: { start: "2000-01-01", end: "2100-01-01" },
+      });
+      return { rotulo: "todo o período", ...res.data };
+    },
+    [tipoPeriodo, mesSelecionado, semanaSelecionada, anoSelecionado],
+    { limparAoErrar: true }
+  );
 
   async function carregarMeta() {
     try {
@@ -164,11 +166,6 @@ export default function Relatorio() {
       // meta é um extra - se falhar em carregar, só não mostra nada
     }
   }
-
-  useEffect(() => {
-    carregar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tipoPeriodo, mesSelecionado, semanaSelecionada, anoSelecionado]);
 
   useEffect(() => {
     carregarMeta();
@@ -241,10 +238,6 @@ export default function Relatorio() {
     });
     return `conic-gradient(${trechos.join(", ")})`;
   }, [categorias]);
-
-  const metaAtingida = resumo && meta !== null && resumo.balance >= meta;
-  const progressoMeta =
-    resumo && meta ? Math.min(100, Math.max(0, (resumo.balance / meta) * 100)) : 0;
 
   return (
     <div>
@@ -321,196 +314,32 @@ export default function Relatorio() {
 
       {resumo && (
         <>
-          <div className="grade-resumo">
-            <div className="cartao-resumo resumo-receita">
-              <div className="cartao-resumo-rotulo">Receita</div>
-              <div className="cartao-resumo-valor">{formatarMoeda(resumo.total_income)}</div>
-            </div>
-            <div className="cartao-resumo resumo-despesa">
-              <div className="cartao-resumo-rotulo">Despesa</div>
-              <div className="cartao-resumo-valor">{formatarMoeda(resumo.total_expense)}</div>
-            </div>
-            <div
-              className={`cartao-resumo ${resumo.balance >= 0 ? "resumo-saldo-positivo" : "resumo-saldo-negativo"}`}
-            >
-              <div className="cartao-resumo-rotulo">Saldo</div>
-              <div className="cartao-resumo-valor">{formatarMoeda(resumo.balance)}</div>
-            </div>
-          </div>
+          <CartoesResumo receita={resumo.total_income} despesa={resumo.total_expense} saldo={resumo.balance} />
 
           {tipoPeriodo === "mensal" && (
-            <div className="cartao cartao-meta">
-              <div className="cartao-meta-cabecalho">
-                <span className="cartao-meta-titulo">Meta do mês</span>
-
-                {meta !== null && !editandoMeta && (
-                  <span
-                    className={`cartao-meta-status ${
-                      metaAtingida ? "cartao-meta-status-atingida" : "cartao-meta-status-em-andamento"
-                    }`}
-                  >
-                    {metaAtingida ? "Meta atingida! 🎉" : "Em andamento"}
-                  </span>
-                )}
-                {meta === null && !editandoMeta && (
-                  <span className="cartao-meta-status cartao-meta-status-sem-meta">Sem meta definida</span>
-                )}
-              </div>
-
-              {editandoMeta ? (
-                <form className="form-editar-meta" onSubmit={salvarMeta}>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    placeholder="Ex: 500"
-                    value={valorMetaInput}
-                    onChange={(e) => setValorMetaInput(e.target.value)}
-                    autoFocus
-                  />
-                  <button type="submit" className="botao botao-primario" disabled={salvandoMeta}>
-                    {salvandoMeta ? "Salvando..." : "Salvar"}
-                  </button>
-                  <button
-                    type="button"
-                    className="botao botao-secundario"
-                    onClick={() => setEditandoMeta(false)}
-                    disabled={salvandoMeta}
-                  >
-                    Cancelar
-                  </button>
-                </form>
-              ) : (
-                <>
-                  {meta !== null ? (
-                    <>
-                      <div className="trilha-meta">
-                        <div
-                          className={`preenchimento-meta ${metaAtingida ? "preenchimento-meta-atingida" : ""}`}
-                          style={{ width: `${progressoMeta}%` }}
-                        />
-                      </div>
-                      <p className="cartao-meta-texto">
-                        {formatarMoeda(resumo.balance)} de {formatarMoeda(meta)}
-                        {!metaAtingida && meta - resumo.balance > 0 && (
-                          <> · faltam {formatarMoeda(meta - resumo.balance)}</>
-                        )}
-                        {" · "}
-                        <button type="button" className="link-botao" onClick={iniciarEdicaoMeta}>
-                          Editar meta
-                        </button>
-                      </p>
-                    </>
-                  ) : (
-                    <p className="cartao-meta-texto">
-                      Defina uma meta de saldo positivo pra acompanhar seu progresso todo mês.{" "}
-                      <button type="button" className="link-botao" onClick={iniciarEdicaoMeta}>
-                        Definir meta
-                      </button>
-                    </p>
-                  )}
-                </>
-              )}
-            </div>
+            <CartaoMeta
+              saldo={resumo.balance}
+              meta={meta}
+              editando={editandoMeta}
+              valorInput={valorMetaInput}
+              salvando={salvandoMeta}
+              onChangeValorInput={setValorMetaInput}
+              onIniciarEdicao={iniciarEdicaoMeta}
+              onCancelarEdicao={() => setEditandoMeta(false)}
+              onSalvar={salvarMeta}
+            />
           )}
 
-          <div className="cartao">
-            <div className="cabecalho-cartao cabecalho-cartao-com-acoes">
-              <div className="alternador-grafico">
-                <button
-                  type="button"
-                  className={`botao-alternador${visaoCategoria === "despesas" ? " botao-alternador-ativo botao-alternador-despesa" : ""}`}
-                  onClick={() => setVisaoCategoria("despesas")}
-                >
-                  Despesas
-                </button>
-                <button
-                  type="button"
-                  className={`botao-alternador${visaoCategoria === "receitas" ? " botao-alternador-ativo botao-alternador-receita" : ""}`}
-                  onClick={() => setVisaoCategoria("receitas")}
-                >
-                  Receitas
-                </button>
-              </div>
-
-              {categorias.length > 0 && (
-                <div className="alternador-grafico">
-                  <button
-                    type="button"
-                    className={`botao-alternador${tipoGrafico === "pizza" ? " botao-alternador-ativo" : ""}`}
-                    onClick={() => setTipoGrafico("pizza")}
-                  >
-                    Pizza
-                  </button>
-                  <button
-                    type="button"
-                    className={`botao-alternador${tipoGrafico === "barras" ? " botao-alternador-ativo" : ""}`}
-                    onClick={() => setTipoGrafico("barras")}
-                  >
-                    Barras
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="cabecalho-cartao">
-              <strong>{visaoCategoria === "despesas" ? "Despesas" : "Receitas"} por categoria</strong>
-              <span> · {resumo.rotulo}</span>
-            </div>
-
-            {categorias.length === 0 ? (
-              <div className="estado-vazio">
-                Nenhuma {visaoCategoria === "despesas" ? "despesa" : "receita"} registrada nesse período.
-              </div>
-            ) : tipoGrafico === "pizza" ? (
-              <div className="grafico-pizza-container">
-                <div className="grafico-pizza-donut" style={{ background: gradientePizza }}>
-                  <div className="grafico-pizza-furo">
-                    <span className="grafico-pizza-furo-rotulo">
-                      {visaoCategoria === "despesas" ? "Despesas" : "Receitas"}
-                    </span>
-                    <span className="grafico-pizza-furo-valor">
-                      {formatarMoeda(categorias.reduce((soma, c) => soma + c.total, 0))}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grafico-pizza-legenda">
-                  {categorias.map((cat) => (
-                    <div key={cat.nome} className="legenda-item">
-                      <span className="legenda-cor" style={{ backgroundColor: cat.cor }} />
-                      <span className="legenda-nome">{cat.nome}</span>
-                      <span className="legenda-valor" style={{ color: cat.cor }}>
-                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}% do total
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="grafico-barras">
-                {categorias.map((cat) => (
-                  <div key={cat.nome} className="linha-barra">
-                    <div className="rotulo-barra">
-                      <span className="rotulo-barra-nome">{cat.nome}</span>
-                      <span className="rotulo-barra-valor" style={{ color: cat.cor }}>
-                        {formatarMoeda(cat.total)} · {cat.percentual.toFixed(1)}% do total
-                      </span>
-                    </div>
-                    <div className="trilha-barra">
-                      <div
-                        className="preenchimento-barra"
-                        style={{
-                          width: `${maiorValor > 0 ? (cat.total / maiorValor) * 100 : 0}%`,
-                          backgroundColor: cat.cor,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <GraficoCategorias
+            categorias={categorias}
+            rotuloPeriodo={resumo.rotulo}
+            visaoCategoria={visaoCategoria}
+            onChangeVisaoCategoria={setVisaoCategoria}
+            tipoGrafico={tipoGrafico}
+            onChangeTipoGrafico={setTipoGrafico}
+            gradientePizza={gradientePizza}
+            maiorValor={maiorValor}
+          />
         </>
       )}
     </div>

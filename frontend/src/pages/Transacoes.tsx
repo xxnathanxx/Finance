@@ -1,7 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../lib/api";
-import { formatarMoeda, mesAtualComoValorDeInput } from "../lib/formatacao";
+import { formatarData, mesAtualComoValorDeInput } from "../lib/formatacao";
+import { useCarregar } from "../lib/useCarregar";
 import ImportarFatura from "../components/ImportarFatura";
+import CartoesResumo from "../components/CartoesResumo";
+import FormularioTransacao from "../components/FormularioTransacao";
+import LinhaTransacao from "../components/LinhaTransacao";
 
 type Categoria = {
   id: number;
@@ -33,16 +37,34 @@ function hojeComoValorDeInput(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-function formatarData(data: string): string {
-  const [ano, mes, dia] = data.split("-");
-  return `${dia}/${mes}/${ano}`;
-}
+type DadosTransacoes = {
+  transacoes: Transacao[];
+  categorias: Categoria[];
+};
 
 export default function Transacoes() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
-  const [categorias, setCategorias] = useState<Categoria[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    dados: { transacoes, categorias },
+    setDados,
+    carregando: loading,
+    erro: error,
+    setErro: setError,
+    recarregar: carregar,
+  } = useCarregar<DadosTransacoes>(
+    { transacoes: [], categorias: [] },
+    async () => {
+      const [resTransacoes, resCategorias] = await Promise.all([
+        api.get<Transacao[]>("/transactions"),
+        api.get<Categoria[]>("/categories"),
+      ]);
+      return { transacoes: resTransacoes.data, categorias: resCategorias.data };
+    },
+    []
+  );
+
+  function atualizarTransacoes(fn: (prev: Transacao[]) => Transacao[]) {
+    setDados((prev) => ({ ...prev, transacoes: fn(prev.transacoes) }));
+  }
 
   const [modoFiltro, setModoFiltro] = useState<ModoFiltro>("mes");
   const [mesSelecionado, setMesSelecionado] = useState(mesAtualComoValorDeInput());
@@ -61,29 +83,6 @@ export default function Transacoes() {
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const [importando, setImportando] = useState(false);
-
-  async function carregar() {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const [resTransacoes, resCategorias] = await Promise.all([
-        api.get<Transacao[]>("/transactions"),
-        api.get<Categoria[]>("/categories"),
-      ]);
-      setTransacoes(resTransacoes.data);
-      setCategorias(resCategorias.data);
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || "Falha ao carregar transações";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    carregar();
-  }, []);
 
   const transacoesFiltradas = useMemo(() => {
     const filtradas =
@@ -130,7 +129,7 @@ export default function Transacoes() {
         category_id: categoriaId ? Number(categoriaId) : null,
         date: data,
       });
-      setTransacoes((prev) => [res.data, ...prev]);
+      atualizarTransacoes((prev) => [res.data, ...prev]);
       setDescricao("");
       setValor("");
     } catch (err: any) {
@@ -172,7 +171,7 @@ export default function Transacoes() {
         category_id: edicao.categoriaId ? Number(edicao.categoriaId) : null,
         date: edicao.data,
       });
-      setTransacoes((prev) => prev.map((t) => (t.id === id ? res.data : t)));
+      atualizarTransacoes((prev) => prev.map((t) => (t.id === id ? res.data : t)));
       cancelarEdicao();
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || "Falha ao atualizar transação";
@@ -191,7 +190,7 @@ export default function Transacoes() {
 
     try {
       await api.delete(`/transactions/${id}`);
-      setTransacoes((prev) => prev.filter((t) => t.id !== id));
+      atualizarTransacoes((prev) => prev.filter((t) => t.id !== id));
     } catch (err: any) {
       const msg = err?.response?.data?.detail || err?.message || "Falha ao excluir transação";
       setError(msg);
@@ -328,60 +327,32 @@ export default function Transacoes() {
         />
       )}
 
-      <form className="formulario-transacao" onSubmit={criarTransacao}>
-        <input
-          className="campo-descricao"
-          aria-label="Descrição"
-          placeholder="Descrição (ex: Supermercado)"
-          value={descricao}
-          onChange={(e) => setDescricao(e.target.value)}
-        />
-        <input
-          className="campo-valor"
-          type="number"
-          step="0.01"
-          min="0"
-          aria-label="Valor"
-          placeholder="Valor"
-          value={valor}
-          onChange={(e) => setValor(e.target.value)}
-        />
-        <select aria-label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value as "income" | "expense")}>
-          <option value="expense">Despesa</option>
-          <option value="income">Receita</option>
-        </select>
-        <select aria-label="Categoria" value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
-          <option value="">Sem categoria</option>
-          {categoriasAtivas.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <input type="date" aria-label="Data" value={data} onChange={(e) => setData(e.target.value)} />
-        <button type="submit" className="botao botao-primario" disabled={salvando}>
-          {salvando ? "Salvando..." : "Adicionar"}
-        </button>
-      </form>
+      <FormularioTransacao
+        descricao={descricao}
+        valor={valor}
+        tipo={tipo}
+        categoriaId={categoriaId}
+        data={data}
+        categorias={categoriasAtivas}
+        salvando={salvando}
+        onChangeDescricao={setDescricao}
+        onChangeValor={setValor}
+        onChangeTipo={setTipo}
+        onChangeCategoriaId={setCategoriaId}
+        onChangeData={setData}
+        onSubmit={criarTransacao}
+      />
 
       {error && <div className="aviso aviso-erro">{error}</div>}
 
-      <div className="grade-resumo">
-        <div className="cartao-resumo resumo-receita">
-          <div className="cartao-resumo-rotulo">Total recebido</div>
-          <div className="cartao-resumo-valor">{formatarMoeda(receitaFiltrada)}</div>
-        </div>
-        <div className="cartao-resumo resumo-despesa">
-          <div className="cartao-resumo-rotulo">Total gasto</div>
-          <div className="cartao-resumo-valor">{formatarMoeda(despesaFiltrada)}</div>
-        </div>
-        <div
-          className={`cartao-resumo ${saldoFiltrado >= 0 ? "resumo-saldo-positivo" : "resumo-saldo-negativo"}`}
-        >
-          <div className="cartao-resumo-rotulo">Saldo do período</div>
-          <div className="cartao-resumo-valor">{formatarMoeda(saldoFiltrado)}</div>
-        </div>
-      </div>
+      <CartoesResumo
+        receita={receitaFiltrada}
+        despesa={despesaFiltrada}
+        saldo={saldoFiltrado}
+        rotuloReceita="Total recebido"
+        rotuloDespesa="Total gasto"
+        rotuloSaldo="Saldo do período"
+      />
 
       <div className="cartao">
         <div className="cabecalho-cartao">
@@ -391,89 +362,21 @@ export default function Transacoes() {
         {transacoesFiltradas.length === 0 ? (
           <div className="estado-vazio">Nenhuma transação nesse período.</div>
         ) : (
-          transacoesFiltradas.map((t) => {
-            const emEdicao = editandoId === t.id;
-            const ocupado = busyId === t.id;
-
-            if (emEdicao && edicao) {
-              return (
-                <div key={t.id} className="linha-transacao linha-transacao-edicao">
-                  <input
-                    type="date"
-                    aria-label="Data"
-                    value={edicao.data}
-                    onChange={(e) => setEdicao({ ...edicao, data: e.target.value })}
-                  />
-                  <input
-                    className="campo-descricao"
-                    aria-label="Descrição"
-                    value={edicao.descricao}
-                    onChange={(e) => setEdicao({ ...edicao, descricao: e.target.value })}
-                  />
-                  <select
-                    aria-label="Categoria"
-                    value={edicao.categoriaId}
-                    onChange={(e) => setEdicao({ ...edicao, categoriaId: e.target.value })}
-                  >
-                    <option value="">Sem categoria</option>
-                    {categoriasAtivas.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    aria-label="Tipo"
-                    value={edicao.tipo}
-                    onChange={(e) => setEdicao({ ...edicao, tipo: e.target.value as "income" | "expense" })}
-                  >
-                    <option value="expense">Despesa</option>
-                    <option value="income">Receita</option>
-                  </select>
-                  <input
-                    className="campo-valor"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    aria-label="Valor"
-                    value={edicao.valor}
-                    onChange={(e) => setEdicao({ ...edicao, valor: e.target.value })}
-                  />
-                  <div className="acoes-linha">
-                    <button className="botao botao-primario" onClick={() => salvarEdicao(t.id)} disabled={ocupado}>
-                      {ocupado ? "Salvando..." : "Salvar"}
-                    </button>
-                    <button className="botao botao-secundario" onClick={cancelarEdicao} disabled={ocupado}>
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={t.id} className="linha-transacao">
-                <span className="transacao-data">{formatarData(t.date)}</span>
-                <span className="transacao-descricao">{t.description}</span>
-                <span className="transacao-categoria">{t.category?.name ?? "Sem categoria"}</span>
-                <span className={`selo-tipo ${t.type === "income" ? "selo-tipo-receita" : "selo-tipo-despesa"}`}>
-                  {t.type === "income" ? "Receita" : "Despesa"}
-                </span>
-                <span className={`transacao-valor ${t.type === "income" ? "valor-receita" : "valor-despesa"}`}>
-                  {t.type === "income" ? "+" : "-"}
-                  {formatarMoeda(t.amount)}
-                </span>
-                <div className="acoes-linha">
-                  <button className="botao botao-secundario" onClick={() => iniciarEdicao(t)} disabled={ocupado}>
-                    Editar
-                  </button>
-                  <button className="botao botao-perigo" onClick={() => excluirTransacao(t.id)} disabled={ocupado}>
-                    {ocupado ? "Excluindo..." : "Excluir"}
-                  </button>
-                </div>
-              </div>
-            );
-          })
+          transacoesFiltradas.map((t) => (
+            <LinhaTransacao
+              key={t.id}
+              transacao={t}
+              categorias={categoriasAtivas}
+              emEdicao={editandoId === t.id}
+              edicao={editandoId === t.id ? edicao : null}
+              ocupado={busyId === t.id}
+              onChangeEdicao={setEdicao}
+              onIniciarEdicao={() => iniciarEdicao(t)}
+              onCancelarEdicao={cancelarEdicao}
+              onSalvarEdicao={() => salvarEdicao(t.id)}
+              onExcluir={() => excluirTransacao(t.id)}
+            />
+          ))
         )}
       </div>
     </div>
