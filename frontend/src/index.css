@@ -123,3 +123,32 @@ select option {
   background: var(--color-primary-soft);
   color: var(--color-text);
 }
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Scrollbar fina combinando com o tema escuro (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+/* Scrollbar fina combinando com o tema escuro (Chromium/WebView2) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.24);
+  background-clip: padding-box;
+}
