@@ -159,8 +159,8 @@ export default function Login({ onLoggedIn }: Props) {
         </div>
       </div>
 
-      <div className="credito-autor">
-        feito por <span className="credito-autor-nome">Nathan</span>
+      <div className="credito-autor" title="Nathan">
+        crafted by <span className="credito-autor-nome">N.</span>
       </div>
     </div>
   );
