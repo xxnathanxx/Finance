@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { api } from "../lib/api";
+import { useCarregar } from "../lib/useCarregar";
 
 type CategoryOut = {
   id: number;
@@ -8,8 +9,6 @@ type CategoryOut = {
 };
 
 export default function Categories() {
-  const [items, setItems] = useState<CategoryOut[]>([]);
-  const [loading, setLoading] = useState(false);
   const [busyId, setBusyId] = useState<number | null>(null);
 
   const [newName, setNewName] = useState("");
@@ -17,34 +16,29 @@ export default function Categories() {
   const [editingName, setEditingName] = useState("");
 
   const [showHidden, setShowHidden] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const {
+    dados: items,
+    setDados: setItems,
+    carregando: loading,
+    erro: error,
+    setErro: setError,
+    recarregar: load,
+  } = useCarregar<CategoryOut[]>(
+    [],
+    async () => {
+      // se showHidden=true, pede tudo; se false, pede só ativas (default)
+      const url = showHidden ? "/categories?active_only=false" : "/categories";
+      const res = await api.get<CategoryOut[]>(url);
+      return res.data;
+    },
+    [showHidden]
+  );
 
   const sorted = useMemo(() => {
     const visible = showHidden ? items : items.filter((c) => c.is_active);
     return [...visible].sort((a, b) => a.name.localeCompare(b.name));
   }, [items, showHidden]);
-
-  async function load() {
-    setLoading(true);
-    setError(null);
-
-    try {
-      // se showHidden=true, pede tudo; se false, pede só ativas (default)
-      const url = showHidden ? "/categories?active_only=false" : "/categories";
-      const res = await api.get<CategoryOut[]>(url);
-      setItems(res.data);
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || err?.message || "Falha ao carregar categorias";
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showHidden]);
 
   async function createCategory() {
     const name = newName.trim();
