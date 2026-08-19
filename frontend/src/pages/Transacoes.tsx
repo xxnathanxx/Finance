@@ -276,6 +276,7 @@ export default function Transacoes() {
           {modoFiltro === "mes" ? (
             <input
               type="month"
+              aria-label="Mês"
               value={mesSelecionado}
               onChange={(e) => setMesSelecionado(e.target.value)}
             />
@@ -330,6 +331,7 @@ export default function Transacoes() {
       <form className="formulario-transacao" onSubmit={criarTransacao}>
         <input
           className="campo-descricao"
+          aria-label="Descrição"
           placeholder="Descrição (ex: Supermercado)"
           value={descricao}
           onChange={(e) => setDescricao(e.target.value)}
@@ -339,15 +341,16 @@ export default function Transacoes() {
           type="number"
           step="0.01"
           min="0"
+          aria-label="Valor"
           placeholder="Valor"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
         />
-        <select value={tipo} onChange={(e) => setTipo(e.target.value as "income" | "expense")}>
+        <select aria-label="Tipo" value={tipo} onChange={(e) => setTipo(e.target.value as "income" | "expense")}>
           <option value="expense">Despesa</option>
           <option value="income">Receita</option>
         </select>
-        <select value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
+        <select aria-label="Categoria" value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)}>
           <option value="">Sem categoria</option>
           {categoriasAtivas.map((c) => (
             <option key={c.id} value={c.id}>
@@ -355,7 +358,7 @@ export default function Transacoes() {
             </option>
           ))}
         </select>
-        <input type="date" value={data} onChange={(e) => setData(e.target.value)} />
+        <input type="date" aria-label="Data" value={data} onChange={(e) => setData(e.target.value)} />
         <button type="submit" className="botao botao-primario" disabled={salvando}>
           {salvando ? "Salvando..." : "Adicionar"}
         </button>
@@ -397,15 +400,18 @@ export default function Transacoes() {
                 <div key={t.id} className="linha-transacao linha-transacao-edicao">
                   <input
                     type="date"
+                    aria-label="Data"
                     value={edicao.data}
                     onChange={(e) => setEdicao({ ...edicao, data: e.target.value })}
                   />
                   <input
                     className="campo-descricao"
+                    aria-label="Descrição"
                     value={edicao.descricao}
                     onChange={(e) => setEdicao({ ...edicao, descricao: e.target.value })}
                   />
                   <select
+                    aria-label="Categoria"
                     value={edicao.categoriaId}
                     onChange={(e) => setEdicao({ ...edicao, categoriaId: e.target.value })}
                   >
@@ -417,6 +423,7 @@ export default function Transacoes() {
                     ))}
                   </select>
                   <select
+                    aria-label="Tipo"
                     value={edicao.tipo}
                     onChange={(e) => setEdicao({ ...edicao, tipo: e.target.value as "income" | "expense" })}
                   >
@@ -428,6 +435,7 @@ export default function Transacoes() {
                     type="number"
                     step="0.01"
                     min="0"
+                    aria-label="Valor"
                     value={edicao.valor}
                     onChange={(e) => setEdicao({ ...edicao, valor: e.target.value })}
                   />

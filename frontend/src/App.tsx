@@ -111,9 +111,11 @@ export default function App() {
       </nav>
 
       <main className="conteudo-app">
-        {abaAtiva === "transacoes" && <Transacoes />}
-        {abaAtiva === "relatorio" && <Relatorio />}
-        {abaAtiva === "categorias" && <Categories />}
+        <div key={abaAtiva} className="conteudo-pagina">
+          {abaAtiva === "transacoes" && <Transacoes />}
+          {abaAtiva === "relatorio" && <Relatorio />}
+          {abaAtiva === "categorias" && <Categories />}
+        </div>
       </main>
     </div>
   );

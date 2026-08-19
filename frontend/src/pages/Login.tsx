@@ -82,8 +82,9 @@ export default function Login({ onLoggedIn }: Props) {
         <form onSubmit={handleSubmit}>
           {modo === "cadastrar" && (
             <div className="campo-formulario">
-              <label>Nome</label>
+              <label htmlFor="campo-nome">Nome</label>
               <input
+                id="campo-nome"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Seu nome"
@@ -92,8 +93,9 @@ export default function Login({ onLoggedIn }: Props) {
           )}
 
           <div className="campo-formulario">
-            <label>Email</label>
+            <label htmlFor="campo-email">Email</label>
             <input
+              id="campo-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@exemplo.com"
@@ -101,8 +103,9 @@ export default function Login({ onLoggedIn }: Props) {
           </div>
 
           <div className="campo-formulario">
-            <label>Senha</label>
+            <label htmlFor="campo-senha">Senha</label>
             <input
+              id="campo-senha"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               type="password"
