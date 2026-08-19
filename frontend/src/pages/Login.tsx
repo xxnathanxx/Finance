@@ -160,7 +160,7 @@ export default function Login({ onLoggedIn }: Props) {
       </div>
 
       <div className="credito-autor" title="Nathan">
-        crafted by <span className="credito-autor-nome">N.</span>
+        crafted by <span className="credito-autor-nome">Gengar</span>
       </div>
     </div>
   );

@@ -163,10 +163,30 @@
 .credito-autor-nome {
   font-family: var(--font-display);
   font-weight: 700;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: linear-gradient(135deg, #b48cff, var(--color-primary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+  text-shadow:
+    0 0 10px rgba(124, 92, 255, 0.65),
+    0 0 22px rgba(74, 0, 128, 0.55),
+    0 2px 3px rgba(0, 0, 0, 0.5);
+  animation: sombra-gengar 3.2s ease-in-out infinite;
+}
+
+@keyframes sombra-gengar {
+  0%, 100% {
+    text-shadow:
+      0 0 8px rgba(124, 92, 255, 0.55),
+      0 0 18px rgba(74, 0, 128, 0.45),
+      0 2px 3px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow:
+      0 0 14px rgba(124, 92, 255, 0.9),
+      0 0 30px rgba(74, 0, 128, 0.7),
+      0 2px 3px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .cartao-login {
