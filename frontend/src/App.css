@@ -146,6 +146,7 @@
 }
 
 .credito-autor {
+  position: relative;
   font-size: 0.72rem;
   text-transform: uppercase;
   color: var(--color-text-muted);
@@ -153,6 +154,25 @@
   opacity: 0.45;
   cursor: default;
   transition: opacity 0.2s ease, letter-spacing 0.2s ease;
+}
+
+.fantasma-oculto {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 2px;
+  transform: translate(-50%, 8px) scale(0.7);
+  opacity: 0;
+  filter: drop-shadow(0 0 14px rgba(124, 92, 255, 0.65));
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.credito-autor:hover .fantasma-oculto {
+  opacity: 0.95;
+  transform: translate(-50%, 0) scale(1);
 }
 
 .credito-autor:hover {
