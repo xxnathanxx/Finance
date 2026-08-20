@@ -8,6 +8,7 @@ import {
   salvarCredenciaisLembradas,
 } from "../lib/auth";
 import type { UserOut } from "../lib/auth";
+import { IconeFantasma } from "../components/Icones";
 
 type Props = {
   onLoggedIn: (user: UserOut) => void;
@@ -160,6 +161,7 @@ export default function Login({ onLoggedIn }: Props) {
       </div>
 
       <div className="credito-autor" title="Nathan">
+        <IconeFantasma className="fantasma-oculto" />
         Crafted by <span className="credito-autor-nome">Gengar</span>
       </div>
     </div>

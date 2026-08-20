@@ -98,3 +98,28 @@ export function IconeVazio({ tamanho = 32, className }: IconeProps) {
     </svg>
   );
 }
+
+export function IconeFantasma({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" className={className} aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="gradienteFantasma" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#d9bbff" />
+          <stop offset="100%" stopColor="#4a0080" />
+        </linearGradient>
+        <radialGradient id="gradienteOlho" cx="50%" cy="45%" r="55%">
+          <stop offset="0%" stopColor="#ff8a8a" />
+          <stop offset="60%" stopColor="#e0163c" />
+          <stop offset="100%" stopColor="#7a0018" />
+        </radialGradient>
+      </defs>
+      <path
+        d="M18,52 C15,35 21,16 35,9 C41,5 46,13 50,7 C54,13 59,5 65,9 C79,16 85,35 82,52 L82,86 L74,73 L66,86 L58,73 L50,86 L42,73 L34,86 L26,73 L18,86 Z"
+        fill="url(#gradienteFantasma)"
+      />
+      <ellipse cx="35" cy="42" rx="7.5" ry="9.5" fill="url(#gradienteOlho)" />
+      <ellipse cx="65" cy="42" rx="7.5" ry="9.5" fill="url(#gradienteOlho)" />
+      <path d="M29,58 Q50,76 71,58" stroke="#1a0330" strokeWidth="4.5" fill="none" strokeLinecap="round" />
+    </svg>
+  );
+}
